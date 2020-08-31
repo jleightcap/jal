@@ -2,7 +2,7 @@ BIN  := main
 SRCS := $(wildcard *.c)
 OBJS := $(SRCS:.c=.o)
 
-CFLAGS := -O2 -g -Wall -Wextra -pedantic -std=c99
+CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $(OBJS)

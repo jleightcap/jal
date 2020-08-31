@@ -39,7 +39,10 @@ slist_size(struct slist* sl)
 {
     int num = 0;
     struct slist_node* curr = sl->head;
-    while (curr) num++;
+    while (curr) {
+        num++;
+        curr = curr->next;
+    }
     return num;
 }
 

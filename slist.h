@@ -1,7 +1,11 @@
 #ifndef SLIST_H
 #define SLIST_H
 
-#include <stdlib.h>
+/* SLIST STRUCTURES                                                           */
+/* -------------------------------------------------------------------------- */
+/* slist (string list) is a double linked list of char*s                      */
+/* wrapped in a structure holding a pointer to the list's head and tail.      */
+/* ========================================================================== */
 
 struct slist {
     struct slist_node* head;
@@ -14,10 +18,13 @@ struct slist_node {
     struct slist_node* next;
 };
 
-/*
- *
- *
- * =============== */
+
+
+/* SLIST FUNCTIONS                                                            */
+/* -------------------------------------------------------------------------- */
+/* interface focused on raw strings and slists, slist_nodes should not be     */
+/* touched outside of this file.                                              */
+/* ========================================================================== */
 
 struct
 slist* slist_init();
