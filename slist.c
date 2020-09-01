@@ -2,16 +2,26 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <assert.h>
 
 struct slist*
-slist_init()
+slist_init(void)
 {
     struct slist* sl = malloc(sizeof(struct slist));
+    sl->len = 0;
     sl->head = NULL;
     sl->tail = NULL;
     return sl;
 }
+
+void
+slist_free(struct slist* sl)
+{
+    while (sl->len > 0)
+        slist_pop_back(sl);
+    free(sl);
+}
+
 
 struct slist_node*
 slist_node_init(struct slist_node* prev, struct slist_node* next, char* val)
@@ -24,6 +34,12 @@ slist_node_init(struct slist_node* prev, struct slist_node* next, char* val)
 }
 
 void
+slist_node_free(struct slist_node* sn)
+{
+    free(sn);
+}
+
+void
 slist_push_back(struct slist* sl, char* val)
 {
     struct slist_node* sn = slist_node_init(sl->tail, NULL, val);
@@ -32,20 +48,22 @@ slist_push_back(struct slist* sl, char* val)
     if(!sl->head)
         sl->head = sn;
     sl->tail = sn;
+    sl->len++;
 }
 
-int
-slist_size(struct slist* sl)
+char*
+slist_pop_back(struct slist* sl)
 {
-    int num = 0;
-    struct slist_node* curr = sl->head;
-    while (curr) {
-        num++;
-        curr = curr->next;
-    }
-    return num;
+    assert(sl->len > 0);
+    struct slist_node* tmp = sl->tail;
+    char* tmpstr = tmp->string;
+    if(sl->tail->prev)
+        sl->tail = sl->tail->prev;
+    sl->tail->next = NULL;
+    free(tmp);
+    sl->len--;
+    return tmpstr;
 }
-
 
 void
 slist_print(struct slist* sl)
