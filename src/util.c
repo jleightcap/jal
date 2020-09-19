@@ -7,7 +7,13 @@
 int
 iswhitespace(const char c)
 {
-    return (c == '\t' || c == '\n' || c == '\v' || c == ' ');
+    return (c == '\t' || c == '\n' || c == '\v' || c == ' ' || c == EOF);
+}
+
+int
+issymbol(const char c)
+{
+    return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_'));
 }
 
 char*

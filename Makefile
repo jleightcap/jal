@@ -1,16 +1,17 @@
 BIN  := main
-SRCS := $(wildcard *.c)
+SRCS := $(wildcard src/*.c)
 OBJS := $(SRCS:.c=.o)
 
-CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99
+CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99 -Iinclude/
 
 VALGRIND = valgrind.out
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
-%o: %c $(wildcard *.h)
+%o: %c $(wildcard include/*.h)
 	$(CC) $(CFLAGS) -c -o $@ $<
+
 %: %.o
 	riscv64-linux-gnu-ld -o $@ $^
 
@@ -24,3 +25,4 @@ memtest: $(BIN)
 
 clean:
 	rm -f *.o $(BIN)
+.PHONY: clean

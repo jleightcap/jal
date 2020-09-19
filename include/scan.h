@@ -3,7 +3,7 @@
 
 #include "slist.h"
 
-void
-scan(const char[], const int, struct slist*);
+char*
+scan(const char* file, const int len);
 
 #endif
