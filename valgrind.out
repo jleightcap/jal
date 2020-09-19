@@ -1,0 +1,12 @@
+==1476670== Invalid read of size 1
+==1476670==    at 0x483DC84: strlen (vg_replace_strmem.c:459)
+==1476670==    by 0x48D9AB7: __vfprintf_internal (in /usr/lib/libc-2.32.so)
+==1476670==    by 0x48C4BBE: printf (in /usr/lib/libc-2.32.so)
+==1476670==    by 0x109701: slist_print (slist.c:84)
+==1476670==    by 0x1093AE: main (main.c:39)
+==1476670==  Address 0x4a38104 is 0 bytes after a block of size 4 alloc'd
+==1476670==    at 0x483A77F: malloc (vg_replace_malloc.c:307)
+==1476670==    by 0x10953E: slist_node_init (slist.c:34)
+==1476670==    by 0x1095DE: slist_push_back (slist.c:52)
+==1476670==    by 0x109369: main (main.c:35)
+==1476670== 

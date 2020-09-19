@@ -31,21 +31,21 @@ struct slist*
 slist_init(void);
 
 void
-slist_exit(struct slist*);
+slist_free(struct slist*);
 
 struct slist_node*
-slist_node_init(struct slist_node*, struct slist_node*, char*);
+slist_node_init(struct slist_node*, struct slist_node*, const char* str);
 
 void
-slist_node_exit(struct slist_node*);
+slist_node_free(struct slist_node*);
 
 void
-slist_push_back(struct slist* sl, char* val);
-
-char*
-slist_pop_back(struct slist* sl);
+slist_push_back(struct slist*, const char* str);
 
 void
-slist_print(struct slist* sl);
+slist_pop_back(struct slist*);
+
+void
+slist_print(struct slist*);
 
 #endif

@@ -4,6 +4,8 @@ OBJS := $(SRCS:.c=.o)
 
 CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99
 
+VALGRIND = valgrind.out
+
 $(BIN): $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
@@ -14,6 +16,11 @@ $(BIN): $(OBJS)
 
 %.o: %.s
 	riscv64-linux-gnu-as -o $@ $^
+
+# TEST=[testfile] make memtest
+memtest: $(BIN)
+	valgrind -q --track-origins=yes --leak-check=full --log-file=$(VALGRIND) ./$(BIN) $(TEST)
+	cat -n $(VALGRIND)
 
 clean:
 	rm -f *.o $(BIN)
