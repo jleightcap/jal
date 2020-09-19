@@ -7,37 +7,47 @@
 static int fp = 0; // file position
 
 char*
-scan(const char* file, const int len)
+scan(char* file, const int len)
 {
-    char curr;
-    int hash, startfp;
+    int startfp;
+    long numlit;
+    unsigned long hash;
 
-    // skip whitespace and comments (# to \n or EOF)
+    // skip whitespace and comments ('#' to '\n' or EOF)
     while(iswhitespace(file[fp])) fp++;
-    if(curr == '#') {
-        // comments
+    if(file[fp] == '#') {
         while(file[fp] != '\n' && file[fp] != EOF) fp++;
-        fp++; // move past \n or EOF
         while(iswhitespace(file[fp])) fp++;
     }
+    if(fp >= len) return NULL; // skipped to end of file, return
 
-    curr = file[fp];
-    if(issymbol(curr)) {
-        hash = curr;
+    // symbols
+    if(issymbol(file[fp])) {
+        hash = file[fp];
         startfp = fp;
-        while(issymbol(curr) || (curr >= '0' && curr <= '9')) {
+        // symbols can't start with number characters, but can include them (ex uint_64)
+        while(issymbol(file[fp]) || isnum(file[fp])) {
             printf("%c ", file[fp]);
-            hash = hash * 147 + curr;
-            curr = file[fp++];
+            hash = hash * 67 + file[fp]; // "not terrible" - Nat Tuck 10/1/2019
+            fp++;
         }
-        printf("\nlen=%d\n", fp - startfp);
-        //printf("hash = %d\n", hash);
-    }
-
-    if(fp >= len) return NULL;
-    else {
-        printf("not symbol: %c\n", file[fp]);
-        fp++;
+        printf("\t\thash = %ld\n", hash);
         return "a";
     }
+
+    // integer literals
+    if(isnum(file[fp])) {
+        numlit = 0;
+        startfp = fp;
+        // scan to end of number literal for length
+        while(isnum(file[fp])) fp++;
+        char* last = file + fp;
+        numlit = strtol(file + startfp, &last, 10); // see scan.h TODO on file const
+        printf("%ld\n", numlit);
+        return "a";
+    }
+
+    printf("%c\n", file[fp]);
+    fp++;
+    return "a";
 }

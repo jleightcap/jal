@@ -9,6 +9,9 @@ iswhitespace(char c);
 int
 issymbol(const char c);
 
+int
+isnum(const char c);
+
 char*
 substr(const char* src, const int offset, const int len);
 

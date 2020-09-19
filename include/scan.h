@@ -3,7 +3,8 @@
 
 #include "slist.h"
 
+// TODO: make file const: atol's char** endptr doesn't allow const
 char*
-scan(const char* file, const int len);
+scan(char* file, const int len);
 
 #endif
