@@ -7,9 +7,8 @@
 static int fp = 0; // file position
 
 char*
-scan(char* file, const int len)
+scan(const char* file, const int len)
 {
-    int startfp;
     long numlit;
     unsigned long hash;
 
@@ -24,25 +23,22 @@ scan(char* file, const int len)
     // symbols
     if(issymbol(file[fp])) {
         hash = file[fp];
-        startfp = fp;
         // symbols can't start with number characters, but can include them (ex uint_64)
         while(issymbol(file[fp]) || isnum(file[fp])) {
-            printf("%c ", file[fp]);
+            printf("%c", file[fp]);
+            // TODO: play with prime numbers in hashing: larger seem to exceed size of ulong
             hash = hash * 67 + file[fp]; // "not terrible" - Nat Tuck 10/1/2019
             fp++;
         }
-        printf("\t\thash = %ld\n", hash);
+        printf(" (hash = %ld)\n", hash);
         return "a";
     }
 
     // integer literals
     if(isnum(file[fp])) {
         numlit = 0;
-        startfp = fp;
-        // scan to end of number literal for length
-        while(isnum(file[fp])) fp++;
-        char* last = file + fp;
-        numlit = strtol(file + startfp, &last, 10); // see scan.h TODO on file const
+        while(isnum(file[fp]))
+            numlit = (numlit * 10) + file[fp++] - '0';
         printf("%ld\n", numlit);
         return "a";
     }
