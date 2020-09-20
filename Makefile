@@ -2,14 +2,15 @@ BIN  := main
 SRCS := $(wildcard src/*.c)
 OBJS := $(SRCS:.c=.o)
 
-CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99 -Iinclude/
+INCLUDE = ./include
+CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99 -I$(INCLUDE)
 
 VALGRIND = valgrind.out
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
-%o: %c $(wildcard include/*.h)
+%o: %c $(wildcard $(INCLUDE)/*.h)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 %: %.o
@@ -24,5 +25,5 @@ memtest: $(BIN)
 	cat -n $(VALGRIND)
 
 clean:
-	rm -f *.o $(BIN)
+	rm -f src/*.o $(BIN) $(VALGRIND)
 .PHONY: clean

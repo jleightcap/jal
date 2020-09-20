@@ -12,7 +12,7 @@ issymbol(const char c);
 int
 isnum(const char c);
 
-char*
-substr(const char* src, const int offset, const int len);
+unsigned long
+hashstr(const char* str);
 
 #endif

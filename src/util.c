@@ -1,8 +1,10 @@
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include "util.h"
+#include "token.h"
 
 int
 iswhitespace(const char c)
@@ -22,11 +24,15 @@ isnum(const char c)
     return (c >= '0' && c <= '9');
 }
 
-char*
-substr(const char* src, const int offset, const int len)
+unsigned long
+hashstr(const char* str)
 {
-    char* buf = malloc((len + 1) * sizeof(char));
-    memcpy(buf, &src[offset], len);
-    buf[len + 1] = '\0';
-    return buf;
+    assert(strlen(str) > 0);
+    unsigned long ii;
+    unsigned long hash;
+    hash = str[0];
+    for(ii = 0; ii < strlen(str); ii++) {
+        hash = (hash * 67 + str[ii]) % ENV_SIZE;
+    }
+    return hash;
 }
