@@ -1,15 +1,17 @@
 #ifndef SCAN_H
 #define SCAN_H
+
 #define ENV_SIZE 1000
 
 enum toktype {
-    // parse tokens
+    // parsing tokens
     LPAREN,             // '('
     RPAREN,             // ')'
     END,                // EOF
 
     // atoms
-    INTLIT,             // number
+    NUM_LIT,            // number
+    SYM,                // symbol with not determined type
     SYMVAR,             // non-reserved variable symbol
     SYMFUN,             // non-reserved function symbol
 
@@ -32,11 +34,15 @@ enum toktype {
 
     // binary comparators
     EQ,                 // (== a b)
-    NE,      // (!= a b)
-    GT,      // (>  a b)
-    LT,      // (<  a b)
-    GE,      // (>= a b)
-    LE       // (<= a b)
+    NE,                 // (!= a b)
+    GT,                 // (>  a b)
+    LT,                 // (<  a b)
+    GE,                 // (>= a b)
+    LE = 1<<30                // (<= a b)
+};
+
+enum type {
+    INT
 };
 
 struct token {
@@ -44,19 +50,32 @@ struct token {
     union {
         int num;
         long hash;
-        char _; // no value
     } value;
 };
 
+// environment definitions
+
+struct expr {
+    int val; // haha I wish
+};
+
+struct func {
+    enum type type;
+    struct expr body;
+};
+
 struct funenv {
-    struct token env[ENV_SIZE];
+    struct func env[ENV_SIZE];
 };
 
 struct varenv {
     struct token env[ENV_SIZE];
 };
 
+void
+setstream(const char stream[], int streamlen);
+
 struct token
-scan(const char* file, const int len);
+scan();
 
 #endif

@@ -13,11 +13,11 @@ $(BIN): $(OBJS)
 %o: %c $(wildcard $(INCLUDE)/*.h)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%: %.o
-	riscv64-linux-gnu-ld -o $@ $^
-
 %.o: %.s
 	riscv64-linux-gnu-as -o $@ $^
+
+%.bin: %.o
+	riscv64-linux-gnu-ld -o $@ $^
 
 # TEST=[testfile] make memtest
 memtest: $(BIN)

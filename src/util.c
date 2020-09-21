@@ -28,11 +28,8 @@ unsigned long
 hashstr(const char* str)
 {
     assert(strlen(str) > 0);
-    unsigned long ii;
-    unsigned long hash;
-    hash = str[0];
-    for(ii = 0; ii < strlen(str); ii++) {
+    unsigned long hash = str[0];
+    for(size_t ii = 0; ii < strlen(str); ii++)
         hash = (hash * 67 + str[ii]) % ENV_SIZE;
-    }
     return hash;
 }

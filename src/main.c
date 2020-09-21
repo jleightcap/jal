@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "token.h"
+#include "parse.h"
 #include "util.h"
 
 int
@@ -29,36 +29,11 @@ main(int ac, char** av) {
         return -1;
     }
 
-    //struct funenv fenv;
-    //struct varenv venv;
-    struct token tok;
-    do {
-        tok = scan(file, sb.st_size);
-        switch(tok.type) {
-            case MAIN:
-                printf("main keyword\n");
-                break;
-            case DEFUN:
-                printf("defun keyword\n");
-                break;
-            case TYPE_INT:
-                printf("int type\n");
-                break;
-            case INTLIT:
-                printf("int literal\n");
-                break;
-            case LPAREN:
-                printf("lparen\n");
-                break;
-            case RPAREN:
-                printf("rparen\n");
-                break;
-            case END:
-                printf("EOF\n");
-                break;
-            default:
-                printf("other\n");
-                break;
-        }
-    } while(tok.type != END);
+    struct funenv fenv;        // function environment
+    struct varenv venv_global; // global variable environment
+    setstream(file, sb.st_size);
+    parse(&fenv, &venv_global);
+
+    unsigned long name = hashstr("main");
+    printf("%d\n", fenv.env[name].body.val);
 }

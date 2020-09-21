@@ -6,16 +6,28 @@
 #include "util.h"
 
 static int fp = 0; // file position
+const char* file = NULL;
+int len = 0;
+
+void
+setstream(const char stream[], int streamlen)
+{
+    file = stream;
+    len = streamlen;
+}
 
 struct token
-scan(const char* file, const int len)
+scan()
 {
+    assert(file != NULL && "file stream not initialized: use setstream!");
+    assert(len  != 0    && "len not initialized: use setstream!");
+
     int numlit;
     struct token tok;
 
     // skip whitespace and comments ('#' to '\n' or EOF)
     while(iswhitespace(file[fp])) fp++;
-    if(file[fp] == '#') {
+    while(file[fp] == '#') {
         while(file[fp] != '\n' && file[fp] != EOF) fp++;
         while(iswhitespace(file[fp])) fp++;
     }
@@ -33,43 +45,68 @@ scan(const char* file, const int len)
             hash = (hash * 67 + file[fp]) % ENV_SIZE;
             fp++;
         }
-
+        
         // reserved keywords
         if(hash == hashstr("main"))
             tok.type = MAIN;
         else if(hash == hashstr("defun"))
             tok.type = DEFUN;
+        else if(hash == hashstr("devar"))
+            tok.type = DEVAR;
         else if (hash == hashstr("int"))
             tok.type = TYPE_INT;
 
-        // new define
+        // new symbol
         else {
-            tok.type = SYMVAR;
+            tok.type = SYM;
         }
 
         tok.value.hash = hash;
         return tok;
     }
-
     // integer literals
     if(isnum(file[fp])) {
         numlit = 0;
         while(isnum(file[fp]))
             numlit = (numlit * 10) + file[fp++] - '0';
-        tok.type = INTLIT;
+        tok.type = NUM_LIT;
         tok.value.num = numlit;
         return tok;
     }
-
-    if (file[fp] == '(') {
+    // lparen
+    if(file[fp] == '(') {
         fp++;
         tok.type = LPAREN;
         return tok;
     }
-
-    if (file[fp] == ')') {
+    // rparen
+    if(file[fp] == ')') {
         fp++;
         tok.type = RPAREN;
+        return tok;
+    }
+    // +
+    if(file[fp] == '+') {
+        fp++;
+        tok.type = ADD;
+        return tok;
+    }
+    // -
+    if(file[fp] == '-') {
+        fp++;
+        tok.type = SUB;
+        return tok;
+    }
+    // *
+    if(file[fp] == '*') {
+        fp++;
+        tok.type = MUL;
+        return tok;
+    }
+    // /
+    if(file[fp] == '/') {
+        fp++;
+        tok.type = DIV;
         return tok;
     }
 

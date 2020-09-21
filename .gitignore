@@ -3,3 +3,4 @@ tags
 *.o
 *.s
 *.jc
+*.bin
