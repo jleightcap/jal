@@ -15,6 +15,18 @@ parse_checktok(const struct token* tok, const enum toktype type, const char* loc
     }
 }
 
+// convert a token type to a fenv type for a given name.
+void
+typetok_to_type(const struct token* tok, const unsigned long int name, struct funenv* fenv)
+{
+    switch(tok->type) {
+        case TYPE_INT:
+            fenv->env[name].type = INT; break;
+        default:
+            fprintf(stderr, "type not recognized!\n"); exit(-1);
+    }
+}
+
 // parse a function definition.
 // tokenizing begins at left parentheses after "defun" token.
 void
@@ -22,31 +34,31 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
 {
     struct token currtok;
     currtok = scan();
-    parse_checktok(&currtok, LPAREN, "function name");
+    parse_checktok(&currtok, LPAREN, "function signature begin");
 
     // FUNCTION SIGNATURE PARSING
     currtok = scan(); // function name
     unsigned long name = currtok.value.hash;
     currtok = scan(); // function return type
-    switch(currtok.type) {
-        case TYPE_INT:
-            fenv->env[name].type = INT;
-            break;
-        default:
-            fprintf(stderr, "not recognized type definition!\n"); exit(-1);
-    }
+    typetok_to_type(&currtok, name, fenv);
     // TODO:
-    // this is where parsing arugments would occur!
+    // this is where parsing arguments would occur!
     
     currtok = scan();
-    parse_checktok(&currtok, RPAREN, "function signature");
+    parse_checktok(&currtok, RPAREN, "function signature end");
+    currtok = scan();
+    parse_checktok(&currtok, LPAREN, "function body begin");
 
     // FUNCTION BODY PARSING
+    currtok = scan();
+    parse_checktok(&currtok, RETRN, "return declaration");
     currtok = scan();
     fenv->env[name].body.val = currtok.value.num; // TODO: expressions are only numbers now!
 
     currtok = scan();
     parse_checktok(&currtok, RPAREN, "function body end");
+    currtok = scan();
+    parse_checktok(&currtok, RPAREN, "function declaration end");
 }
 
 void

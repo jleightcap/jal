@@ -53,6 +53,8 @@ scan()
             tok.type = DEFUN;
         else if(hash == hashstr("devar"))
             tok.type = DEVAR;
+        else if(hash == hashstr("ret"))
+            tok.type = RETRN;
         else if (hash == hashstr("int"))
             tok.type = TYPE_INT;
 

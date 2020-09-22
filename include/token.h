@@ -19,6 +19,7 @@ enum toktype {
     MAIN,               // (main int) [args]
     DEFUN,              // (defun [signature] [body])
     DEVAR,              //  (defar [var] [body])
+    RETRN,              // (return [expr])
     TRUE,               // "true"
     FALSE,              // "false"
 
@@ -38,7 +39,7 @@ enum toktype {
     GT,                 // (>  a b)
     LT,                 // (<  a b)
     GE,                 // (>= a b)
-    LE = 1<<30                // (<= a b)
+    LE                  // (<= a b)
 };
 
 enum type {
