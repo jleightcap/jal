@@ -15,7 +15,7 @@ parse_checktok(const struct token* tok, const enum toktype type, const char* loc
     }
 }
 
-// convert a token type to a fenv type for a given name.
+// convert a token holding a type to the type associated with a given name
 void
 typetok_to_type(const struct token* tok, const unsigned long int name, struct funenv* fenv)
 {
@@ -33,66 +33,57 @@ void
 parse_defun(struct funenv* fenv, struct varenv* venv)
 {
     struct token currtok;
-    currtok = scan();
-    parse_checktok(&currtok, LPAREN, "function signature begin");
 
     // FUNCTION SIGNATURE PARSING
+    currtok = scan(); // (
+    parse_checktok(&currtok, LPAREN, "function signature begin");
     currtok = scan(); // function name
     unsigned long name = currtok.value.hash;
     currtok = scan(); // function return type
     typetok_to_type(&currtok, name, fenv);
-    // TODO:
-    // this is where parsing arguments would occur!
-    
-    currtok = scan();
+    // TODO: this is where parsing arguments would occur!
+    currtok = scan(); // )
     parse_checktok(&currtok, RPAREN, "function signature end");
-    currtok = scan();
-    parse_checktok(&currtok, LPAREN, "function body begin");
 
     // FUNCTION BODY PARSING
-    currtok = scan();
+    currtok = scan(); // (
+    parse_checktok(&currtok, LPAREN, "function body begin");
+    currtok = scan(); // 'return'
     parse_checktok(&currtok, RETRN, "return declaration");
     currtok = scan();
-    fenv->env[name].body.val = currtok.value.num; // TODO: expressions are only numbers now!
+    // TODO: expressions are only numbers now!
+    fenv->env[name].body.val = currtok.value.num;
+    currtok = scan(); // )
+    parse_checktok(&currtok, RPAREN, "function body end");
 
     currtok = scan();
-    parse_checktok(&currtok, RPAREN, "function body end");
-    currtok = scan();
-    parse_checktok(&currtok, RPAREN, "function declaration end");
+    parse_checktok(&currtok, RPAREN, "function declaration end (match defun)");
 }
 
 void
 parse(struct funenv* fenv, struct varenv* venv)
 {
-    struct token currtok; // not to be consused with Kurtag
-    currtok = scan();
-    parse_checktok(&currtok, LPAREN, "beginning expression");
-    currtok = scan();
+    struct token currtok; // not to be confused with Kurtag
+    for(currtok = scan(); currtok.type != END; currtok=scan()) {
+        parse_checktok(&currtok, LPAREN, "beginning expression");
+        currtok = scan();
 
-    // top-level definitions, can be:
-    // - "defun"
-    // - "defvar"
-    // - 'main"
-    switch(currtok.type) {
-        // function definition
-        case DEFUN:
-            printf("defining function...\n");
-            parse_defun(fenv, venv);
-            break;
+        // global definitions, can be:
+        // - "defun"
+        // - "defvar"
+        switch(currtok.type) {
+            // function definition
+            case DEFUN:
+                parse_defun(fenv, venv);
+                break;
 
-        // variable definition
-        case DEVAR:
-            printf("defining variable...\n");
-            break;
-            
-        // a symbol: must be call to defined function
-        case SYM:
-        case SYMFUN:
-            printf("function call\n");
-            break;
-
-        default:
-            fprintf(stderr, "unexpected token at expression initialization!\n");
-            exit(-1);
+            // variable definition
+            case DEVAR:
+                break;
+                
+            default:
+                fprintf(stderr, "unexpected token at expression initialization!\n");
+                exit(-1);
+        }
     }
 }

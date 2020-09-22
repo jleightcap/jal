@@ -6,6 +6,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "emit.h"
+#include "eval.h"
 #include "parse.h"
 #include "util.h"
 
@@ -15,8 +17,8 @@ main(int ac, char** av) {
     int fd;
     struct stat sb;
 
-    if (ac != 2) {
-        fprintf(stderr, "usage: %s infile\n", av[0]);
+    if (ac != 3) {
+        fprintf(stderr, "usage: %s infile outfile\n", av[0]);
         return -1;
     }
     if(!(fd = open(av[1], O_RDONLY))) {
@@ -29,11 +31,11 @@ main(int ac, char** av) {
         return -1;
     }
 
+    FILE* outf = fopen(av[2], "w");
+
     struct funenv fenv;        // function environment
     struct varenv venv_global; // global variable environment
     setstream(file, sb.st_size);
     parse(&fenv, &venv_global);
-
-    unsigned long name = hashstr("main");
-    printf("%d\n", fenv.env[name].body.val);
+    emit(outf, &fenv, &venv_global);
 }
