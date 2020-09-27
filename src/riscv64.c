@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "riscv64.h"
+#include "parse.h"
 #include "util.h"
 
 FILE* out;

@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "token.h"
+#include "parse.h"
 
 void
 emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv);

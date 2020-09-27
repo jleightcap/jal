@@ -11,9 +11,7 @@ enum toktype {
 
     // atoms
     NUM_LIT,            // number
-    SYM,                // symbol with not determined type
-    SYMVAR,             // non-reserved variable symbol
-    SYMFUN,             // non-reserved function symbol
+    SYM,                // symbol
 
     // reserved symbols
     MAIN,               // (main int) [args]
@@ -42,9 +40,6 @@ enum toktype {
     LE                  // (<= a b)
 };
 
-enum type {
-    INT
-};
 
 struct token {
     enum toktype type;
@@ -54,24 +49,10 @@ struct token {
     } value;
 };
 
-// environment definitions
 
-struct expr {
-    int val; // haha I wish
-};
-
-struct func {
-    enum type type;
-    struct expr body;
-};
-
-struct funenv {
-    struct func env[ENV_SIZE];
-};
-
-struct varenv {
-    struct token env[ENV_SIZE];
-};
+//
+// FUNCTIONS
+//
 
 void
 setstream(const char stream[], int streamlen);

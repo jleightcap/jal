@@ -37,5 +37,6 @@ main(int ac, char** av) {
     struct varenv venv_global; // global variable environment
     setstream(file, sb.st_size);
     parse(&fenv, &venv_global);
+    eval_entry(&fenv, &venv_global);
     emit(outf, &fenv, &venv_global);
 }

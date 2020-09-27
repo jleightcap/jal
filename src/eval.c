@@ -1,13 +1,14 @@
 #include <stdio.h>
 
 #include "eval.h"
+#include "parse.h"
 #include "token.h"
 #include "util.h"
 
 void
 eval(const struct expr* e)
 {
-    printf("%d\n", e->val);
+    printf("eval: %d\n", e->val);
 }
 
 void
