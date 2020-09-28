@@ -31,6 +31,12 @@ emit_expr(struct expr* e, const struct funenv* fenv, const struct varenv* venv)
                 fprintf(stderr, "TODO: binary op\n"); exit(-1);
         }
         break;
+    case LITERAL_INT:
+        sprintf(arg1, "%d", e->body.val);
+        emit("\taddi\ta0,x0,");
+        emit(arg1);
+        emit("\n");
+        break;
     default:
         fprintf(stderr, "TODO!\n"); exit(-1);
     }
