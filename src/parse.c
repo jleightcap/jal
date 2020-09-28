@@ -7,25 +7,21 @@
 
 struct token currtok;
 
-// if 'tok' is not of type 'type', print 'locationstr' error message and exit
-void
-parse_checktok(const struct token* tok, const enum toktype type, const char* locationstr)
-{
-    if(tok->type != type) {
-        fprintf(stderr, "%s - didn't find expected token!\n", locationstr);
-        exit(-1);
+#define checktok(tok, expect, str) \
+    if(tok.type != expect) { \
+        fprintf(stderr, "%s - didn't find expected token!\n", str); \
+        exit(-1); \
     }
-}
 
 // convert a token holding a type to the type associated with a given name
 void
 typetok_to_type(const enum toktype t, const unsigned long int name, struct funenv* fenv)
 {
     switch(t) {
-        case TYPE_INT:
-            fenv->env[name].type = INT; break;
-        default:
-            fprintf(stderr, "type not recognized!\n"); exit(-1);
+    case TYPE_INT:
+        fenv->env[name].type = INT; break;
+    default:
+        fprintf(stderr, "type not recognized!\n"); exit(-1);
     }
 }
 
@@ -64,9 +60,10 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         currtok = scan(); // operator
         switch(currtok.type) {
         // intrinsic binary ops
-        case ADD: case SUB:
+        case ADD:
+        case SUB:
             printf("intrinsic binary op\n");
-            // doesn't this switch seem stupid? probably is.
+            // doesn't this inner switch seem stupid? probably is.
             // want a common body - this seems most easily understood
             switch(currtok.type) {
             case ADD: e->body.binary.op = PLUS; break;
@@ -85,7 +82,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
             parse_expr(name, e->body.binary.arg2, fenv, venv);
 
             currtok = scan();
-            parse_checktok(&currtok, RPAREN, "intrinsic binary ops: too many arguments?");
+            checktok(currtok, RPAREN, "intrinsic binary ops: too many arguments?");
             return;
         default:
             fprintf(stderr, "unexpected operator!\n"); exit(-1);
@@ -103,7 +100,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         fprintf(stderr, "unexpected expression!\n"); exit(-1);
     }
 
-    parse_checktok(&currtok, RPAREN, "expression end");
+    checktok(currtok, RPAREN, "expression end");
 }
 
 void
@@ -111,20 +108,20 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
 {
     // VARIABLE SIGNATURE PARSING
     currtok = scan(); // (
-    parse_checktok(&currtok, LPAREN, "variable signature begin");
+    checktok(currtok, LPAREN, "variable signature begin");
     currtok = scan(); // variable name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // variable type
     venv->env[name].type = INT; // TODO: associate name and type in venv
     currtok = scan(); // )
-    parse_checktok(&currtok, RPAREN, "variable signature end");
+    checktok(currtok, RPAREN, "variable signature end");
 
     // VARIABLE BODY PARSING
     currtok = scan(); // TODO: variable bodies are just numbers!
     venv->env[name].value.integer = currtok.value.num;
 
     currtok = scan();
-    parse_checktok(&currtok, RPAREN, "variable defition end (match devar)");
+    checktok(currtok, RPAREN, "variable defition end (match devar)");
 }
 
 // parse a function definition.
@@ -134,36 +131,36 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
 {
     // FUNCTION SIGNATURE PARSING
     currtok = scan(); // (
-    parse_checktok(&currtok, LPAREN, "function signature begin");
+    checktok(currtok, LPAREN, "function signature begin");
     currtok = scan(); // function name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // function return type
     typetok_to_type(currtok.type, name, fenv);
     // TODO: this is where parsing arguments would occur!
     currtok = scan(); // )
-    parse_checktok(&currtok, RPAREN, "function signature end");
+    checktok(currtok, RPAREN, "function signature end");
 
     // FUNCTION BODY PARSING
     currtok = scan(); // (
-    parse_checktok(&currtok, LPAREN, "function body begin");
+    checktok(currtok, LPAREN, "function body begin");
     currtok = scan(); // 'return'
-    parse_checktok(&currtok, RETRN, "return declaration");
+    checktok(currtok, RETRN, "return declaration");
     fenv->env[name].body = expr_init();
     struct expr* e = fenv->env[name].body;
     currtok = scan(); // token after 'ret'
     parse_expr(name, e, fenv, venv);
     currtok = scan(); // )
-    parse_checktok(&currtok, RPAREN, "function body end");
+    checktok(currtok, RPAREN, "function body end");
 
     currtok = scan();
-    parse_checktok(&currtok, RPAREN, "function declaration end (match defun)");
+    checktok(currtok, RPAREN, "function declaration end (match defun)");
 }
 
 void
 parse(struct funenv* fenv, struct varenv* venv)
 {
     for(currtok = scan(); currtok.type != END; currtok=scan()) {
-        parse_checktok(&currtok, LPAREN, "beginning expression");
+        checktok(currtok, LPAREN, "beginning expression");
         currtok = scan();
 
         // global definitions, can be:
