@@ -3,8 +3,7 @@ SRCS := $(wildcard src/*.c)
 OBJS := $(SRCS:.c=.o)
 
 INCLUDE = ./include
-CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99 -I$(INCLUDE)
-
+CFLAGS := -O0 -g -Wall -Wextra -pedantic -std=c99 -I$(INCLUDE) 
 VALGRIND = valgrind.out
 
 $(BIN): $(OBJS)
@@ -21,9 +20,9 @@ $(BIN): $(OBJS)
 
 # TEST=[testfile] make memtest
 memtest: $(BIN)
-	valgrind -q --track-origins=yes --leak-check=full --log-file=$(VALGRIND) ./$(BIN) $(TEST)
+	valgrind -q --track-origins=yes --leak-check=full --log-file=$(VALGRIND) ./$(BIN) $(TEST) /dev/null
 	cat -n $(VALGRIND)
 
 clean:
-	rm -f src/*.o $(BIN) $(VALGRIND)
+	rm -f src/*.o *.bin test/*.bin $(BIN) $(VALGRIND)
 .PHONY: clean

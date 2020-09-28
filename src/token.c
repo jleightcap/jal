@@ -39,9 +39,9 @@ scan()
     // symbols
     if(issymbol(file[fp])) {
         unsigned long hash = file[fp];
-        // symbols can't start with number characters, but can include them (ex uint_64)
+        // symbols can't start with number characters, but can include them
         while(issymbol(file[fp]) || isnum(file[fp])) {
-            // TODO: play with prime numbers in hashing: larger seem to exceed size of ulong
+            // TODO: play with prime numbers in hashing
             hash = (hash * 67 + file[fp]) % ENV_SIZE;
             fp++;
         }
@@ -71,7 +71,7 @@ scan()
         numlit = 0;
         while(isnum(file[fp]))
             numlit = (numlit * 10) + file[fp++] - '0';
-        tok.type = NUM_LIT;
+        tok.type = NUM;
         tok.value.num = numlit;
         return tok;
     }

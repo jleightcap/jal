@@ -1,6 +1,12 @@
 #ifndef SCAN_H
 #define SCAN_H
 
+// ========================================================================= //
+//                                                                           //
+// TOKEN DEFINITIONS                                                         //
+//                                                                           //
+// ========================================================================= //
+
 #define ENV_SIZE 1000
 
 enum toktype {
@@ -10,7 +16,7 @@ enum toktype {
     END,                // EOF
 
     // atoms
-    NUM_LIT,            // number
+    NUM,                // number
     SYM,                // symbol
 
     // reserved symbols
@@ -40,7 +46,6 @@ enum toktype {
     LE                  // (<= a b)
 };
 
-
 struct token {
     enum toktype type;
     union {
@@ -50,9 +55,12 @@ struct token {
 };
 
 
-//
-// FUNCTIONS
-//
+
+// ========================================================================= //
+//                                                                           //
+// TOKEN FUNCTIONS                                                           //
+//                                                                           //
+// ========================================================================= //
 
 void
 setstream(const char stream[], int streamlen);

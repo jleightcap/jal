@@ -29,57 +29,80 @@ typetok_to_type(const enum toktype t, const unsigned long int name, struct funen
     }
 }
 
+struct expr*
+expr_init(void)
+{
+    return malloc(sizeof(struct expr));
+}
+
+void
+expr_free(struct expr* e)
+{
+    switch(e->type) {
+    case UNARY:
+        expr_free(e->body.unary.arg);
+        free(e);
+        break;
+    case BINARY:
+        expr_free(e->body.binary.arg1);
+        expr_free(e->body.binary.arg2);
+        free(e);
+        break;
+    case LITERAL_INT:
+        break;
+    }
+}
+
 // parse a expression.
 // tokenizing begins after RETN token.
 void
-parse_expr(const unsigned long name, struct funenv* fenv, struct varenv* venv)
+parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    struct expr e;
-    currtok = scan();
     switch(currtok.type) {
-        // EXPRESSION
-        case LPAREN:
-            currtok = scan(); // operator
+    // EXPRESSION
+    case LPAREN:
+        currtok = scan(); // operator
+        switch(currtok.type) {
+        // intrinsic binary ops
+        case ADD: case SUB:
+            printf("intrinsic binary op\n");
+            // doesn't this switch seem stupid? probably is.
+            // want a common body - this seems most easily understood
             switch(currtok.type) {
-                default:
-                    fprintf(stderr, "unexpected operator!\n"); exit(-1);
+            case ADD: e->body.binary.op = PLUS; break;
+            case SUB: e->body.binary.op = MINUS; break;
+            default: exit(-1);
             }
-            return;
+            e->type = BINARY;
 
-        // ATOMS
-        case NUM_LIT:
-            e.val = currtok.value.num;
-            printf("%d\n", e.val);
-            return;
+            // initialize arg1, associated with same parse arguments
+            e->body.binary.arg1 = expr_init();
+            currtok = scan();
+            parse_expr(name, e->body.binary.arg1, fenv, venv);
+            // initialize arg2, associated with same parse arguments
+            e->body.binary.arg2 = expr_init();
+            currtok = scan();
+            parse_expr(name, e->body.binary.arg2, fenv, venv);
 
+            currtok = scan();
+            parse_checktok(&currtok, RPAREN, "intrinsic binary ops: too many arguments?");
+            return;
         default:
-            fprintf(stderr, "unexpected expression!\n"); exit(-1);
+            fprintf(stderr, "unexpected operator!\n"); exit(-1);
+        }
+        return;
+
+    // ATOMS
+    case NUM:
+        printf("number literal: %d\n", currtok.value.num);
+        e->type = LITERAL_INT;
+        e->body.val = currtok.value.num;
+        return;
+
+    default:
+        fprintf(stderr, "unexpected expression!\n"); exit(-1);
     }
 
-    currtok = scan(); // operator
-    enum toktype op = currtok.type;
-    currtok = scan(); // num1
-    int num1 = currtok.value.num;
-    currtok = scan(); // num2
-    int num2 = currtok.value.num;
-    int result;
-    switch(op) {
-        case ADD:
-            result = num1 + num2; break;
-        case SUB:
-            result = num1 - num2; break;
-        case MUL:
-            result = num1 * num2; break;
-        case DIV:
-            result = num1 / num2; break;
-        case MOD:
-            result = num1 % num2; break;
-        default:
-            fprintf(stderr, "unrecognized operator!"); exit(-1);
-    }
-    fenv->env[name].body.val = result;
-
-    currtok = scan(); // 'return'
     parse_checktok(&currtok, RPAREN, "expression end");
 }
 
@@ -125,7 +148,10 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     parse_checktok(&currtok, LPAREN, "function body begin");
     currtok = scan(); // 'return'
     parse_checktok(&currtok, RETRN, "return declaration");
-    parse_expr(name, fenv, venv);
+    fenv->env[name].body = expr_init();
+    struct expr* e = fenv->env[name].body;
+    currtok = scan(); // token after 'ret'
+    parse_expr(name, e, fenv, venv);
     currtok = scan(); // )
     parse_checktok(&currtok, RPAREN, "function body end");
 
