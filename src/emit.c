@@ -6,7 +6,6 @@
 // architectures
 #include "riscv64.h"
 
-
 void
 emit(FILE* f, const struct funenv* fenv, const struct varenv* venv)
 {

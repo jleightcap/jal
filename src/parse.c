@@ -62,11 +62,13 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         // intrinsic binary ops
         case ADD:
         case SUB:
+        case MUL:
+        case DIV:
             printf("intrinsic binary op\n");
-            // doesn't this inner switch seem stupid? probably is.
-            // want a common body - this seems most easily understood
+            // doesn't this inner switch seem stupid and redundant? probably.
+            // want a common body - this seems most easily understandable
             switch(currtok.type) {
-            case ADD: e->body.binary.op = PLUS; break;
+            case ADD: e->body.binary.op = PLUS;  break;
             case SUB: e->body.binary.op = MINUS; break;
             default: exit(-1);
             }
@@ -104,7 +106,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
 }
 
 void
-parse_devar(struct funenv* fenv, struct varenv* venv)
+parse_devar(struct varenv* venv)
 {
     // VARIABLE SIGNATURE PARSING
     currtok = scan(); // (
@@ -173,11 +175,12 @@ parse(struct funenv* fenv, struct varenv* venv)
                 break;
             // variable definition
             case DEVAR:
-                parse_devar(fenv, venv);
+                parse_devar(venv);
                 break;
             default:
                 fprintf(stderr, "unexpected token at expression initialization!\n");
                 exit(-1);
         }
     }
+    // TODO: free any occupied fenv expressions
 }

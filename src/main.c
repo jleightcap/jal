@@ -7,7 +7,6 @@
 #include <fcntl.h>
 
 #include "emit.h"
-#include "eval.h"
 #include "parse.h"
 #include "util.h"
 
