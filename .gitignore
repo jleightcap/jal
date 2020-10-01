@@ -1,6 +1,6 @@
 valgrind.out
 tags
 *.o
-*.s
-*.jc
+./*.s
+./*.jc
 *.bin

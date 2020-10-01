@@ -1,0 +1,5 @@
+# function with no arguments, maybe void?
+(defun (main int)
+    (ret (+ 40 2))
+)
+# wee comments everywhere
