@@ -1,4 +1,4 @@
-BIN  := main
+BIN  := jal
 SRCS := $(wildcard src/*.c)
 OBJS := $(SRCS:.c=.o)
 

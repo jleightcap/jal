@@ -12,8 +12,38 @@ FILE* out;
 
 struct riscv64_reg_state reg_state;
 
+// emit an available temporary register (t0-t6)
 void
-emit_expr(struct expr* e, const struct funenv* fenv, const struct varenv* venv)
+emit_tmp(void)
+{
+    // temporary registers are disjoint, loop over each set
+    // (t0 - t2) and (t3 - t6)
+    // DEPENDS: order of registers in enum riscv64_regs (riscv64.h)
+    for(int tmp = T0; tmp <= T2; tmp++) {
+        if(!reg_state.reg[tmp]) {
+            switch(tmp) {
+            case T0: emit("t0"); reg_state.reg[T0] = true; break;
+            case T1: emit("t1"); reg_state.reg[T1] = true; break;
+            case T2: emit("t2"); reg_state.reg[T2] = true; break;
+            }
+            return;
+        }
+    }
+    for(int tmp = T3; tmp <= T6; tmp++) {
+        if(!reg_state.reg[tmp]) {
+            switch(tmp) {
+            case T3: emit("t3"); reg_state.reg[T3] = true; break;
+            case T4: emit("t4"); reg_state.reg[T4] = true; break;
+            case T5: emit("t5"); reg_state.reg[T5] = true; break;
+            }
+            return;
+        }
+    }
+    fprintf(stderr, "temporary registers full!\n"); exit(-1);
+}
+
+void
+emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* venv)
 {
     char strbuf[100];
     switch(e->type) {
@@ -32,12 +62,13 @@ emit_expr(struct expr* e, const struct funenv* fenv, const struct varenv* venv)
         }
         break;
     case LITERAL_INT:
-        emit("\taddi\tt0 , x0, ");
         sprintf(strbuf, "%d", e->body.val);
+        emit("\taddi\t");
+        // emit proper register
+        emit_tmp();
+        emit(", x0, ");
         emit(strbuf);
         emit("\n");
-        if(reg_state.reg[T0])
-            printf("already used!\n");
         reg_state.reg[T0] = true;
         break;
     default:
@@ -50,7 +81,7 @@ emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv)
 {
     out = f;
     unsigned long main = hashstr("main");
-    memset(&reg_state, 0, sizeof(struct riscv64_reg_state));
+    memset(&reg_state.reg, 0, sizeof(struct riscv64_reg_state));
     
     emit("\t.globl _start\n");
     emit("_start:\n");
