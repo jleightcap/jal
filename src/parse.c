@@ -161,7 +161,7 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
 void
 parse(struct funenv* fenv, struct varenv* venv)
 {
-    for(currtok = scan(); currtok.type != END; currtok=scan()) {
+    for(currtok = scan(); currtok.type != END; currtok = scan()) {
         checktok(currtok, LPAREN, "beginning expression");
         currtok = scan();
 
