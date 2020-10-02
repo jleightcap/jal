@@ -1,4 +1,4 @@
-valgrind.out
+valgrind.out*
 tags
 *.o
 ./*.s

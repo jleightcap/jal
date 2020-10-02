@@ -14,6 +14,7 @@
 int
 main(int ac, char** av) {
     const char* file;
+    FILE* outf;
     int fd;
     struct stat sb;
 
@@ -26,18 +27,20 @@ main(int ac, char** av) {
         return -1;
     }
     fstat(fd, &sb); // stat input file for size
-    if ((file = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+    if((file = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED) {
         fprintf(stderr, "%s: failed to mmap %s\n", av[0], av[1]);
         return -1;
     }
-
-    FILE* outf = fopen(av[2], "w");
+    if((outf = fopen(av[2], "w")) == NULL) {
+        fprintf(stderr, "%s: failed open %s\n", av[0], av[2]);
+        return -1;
+    }
 
     struct funenv fenv;        // function environment
     struct varenv venv_global; // global variable environment
-    setstream(file, sb.st_size);
     memset(fenv.env, 0, sizeof(fenv.env));
     memset(venv_global.env, 0, sizeof(venv_global.env));
+    setstream(file, sb.st_size);
     parse(&fenv, &venv_global);
     emit(outf, &fenv, &venv_global);
 

@@ -90,6 +90,7 @@ expr_init(void);
 void
 expr_free(struct expr* e);
 
+// free environments (collection of expressions)
 void
 funenv_free(struct funenv* fenv);
 
