@@ -14,12 +14,12 @@ struct token currtok;
     }
 
 // convert a token holding a type to the type associated with a given name
-void
-typetok_to_type(const enum toktype t, const unsigned long int name, struct funenv* fenv)
+enum type
+typetok_to_type(const enum toktype t)
 {
     switch(t) {
     case TYPE_INT:
-        fenv->env[name].type = INT; break;
+        return INT;
     default:
         fprintf(stderr, "type not recognized!\n"); exit(-1);
     }
@@ -139,7 +139,7 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     currtok = scan(); // function name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // function return type
-    typetok_to_type(currtok.type, name, fenv);
+    fenv->env[name].type = typetok_to_type(currtok.type);
     // TODO: this is where parsing arguments would occur!
     currtok = scan(); // )
     checktok(currtok, RPAREN, "function signature end");
