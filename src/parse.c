@@ -37,15 +37,36 @@ expr_free(struct expr* e)
     switch(e->type) {
     case UNARY:
         expr_free(e->body.unary.arg);
-        free(e);
         break;
     case BINARY:
         expr_free(e->body.binary.arg1);
         expr_free(e->body.binary.arg2);
-        free(e);
         break;
     case LITERAL_INT:
         break;
+    }
+    free(e);
+}
+
+void
+funenv_free(struct funenv* fenv)
+{
+    for(int ii = 0; ii < ENV_SIZE; ii++) {
+        if(fenv->env[ii].body) {
+            //printf("%p\n", (void*)fenv->env[ii].body);
+            expr_free(fenv->env[ii].body);
+        }
+    }
+}
+
+void
+varenv_free(struct varenv* venv)
+{
+    for(int ii = 0 ; ii < ENV_SIZE; ii++) {
+        if(venv->env[ii].body) {
+            //printf("%d:\t%p\n", ii, (void*)venv->env[ii].body);
+            expr_free(venv->env[ii].body);
+        }
     }
 }
 
@@ -60,10 +81,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         currtok = scan(); // operator
         switch(currtok.type) {
         // intrinsic binary ops
-        case ADD:
-        case SUB:
-        case MUL:
-        case DIV:
+        case ADD: case SUB: case MUL: case DIV:
             printf("intrinsic binary op\n");
             // doesn't this inner switch seem stupid and redundant? probably.
             // want a common body - this seems most easily understandable
@@ -100,6 +118,14 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         e->body.val = currtok.value.num;
         return;
 
+    // VARIABLE
+    case SYM:
+        // lookup symbol in variable environment
+        e->type = LITERAL_INT; // TODO: evaluate expression
+        e->body.val = venv->env[currtok.value.hash].body->body.val;
+        printf("symbol: %d\n", e->body.val);
+        return;
+
     default:
         fprintf(stderr, "unexpected expression!\n"); exit(-1);
     }
@@ -108,7 +134,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
 }
 
 void
-parse_devar(struct varenv* venv)
+parse_devar(struct funenv* fenv, struct varenv* venv)
 {
     // VARIABLE SIGNATURE PARSING
     currtok = scan(); // (
@@ -116,13 +142,15 @@ parse_devar(struct varenv* venv)
     currtok = scan(); // variable name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // variable type
-    venv->env[name].type = INT; // TODO: associate name and type in venv
+    venv->env[name].type = typetok_to_type(currtok.type);
     currtok = scan(); // )
     checktok(currtok, RPAREN, "variable signature end");
 
     // VARIABLE BODY PARSING
-    currtok = scan(); // TODO: variable bodies are just numbers!
-    venv->env[name].value.integer = currtok.value.num;
+    venv->env[name].body = expr_init();
+    struct expr* e = venv->env[name].body;
+    currtok = scan();
+    parse_expr(name, e, fenv, venv);
 
     currtok = scan();
     checktok(currtok, RPAREN, "variable defition end (match devar)");
@@ -173,16 +201,17 @@ parse(struct funenv* fenv, struct varenv* venv)
         switch(currtok.type) {
             // function definition
             case DEFUN:
+                printf("defun\n");
                 parse_defun(fenv, venv);
                 break;
             // variable definition
             case DEVAR:
-                parse_devar(venv);
+                printf("devar\n");
+                parse_devar(fenv, venv);
                 break;
             default:
                 fprintf(stderr, "unexpected token at expression initialization!\n");
                 exit(-1);
         }
     }
-    // TODO: free any occupied fenv expressions
 }

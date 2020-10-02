@@ -1,0 +1,4 @@
+(devar (x int) 42)
+(defun (main int)
+    (ret x)
+)

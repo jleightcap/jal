@@ -1,13 +1,13 @@
-#ifndef SCAN_H
-#define SCAN_H
+#ifndef TOKEN_H
+#define TOKEN_H
+
+#define ENV_SIZE 1000
 
 // ========================================================================= //
 //                                                                           //
 // TOKEN DEFINITIONS                                                         //
 //                                                                           //
 // ========================================================================= //
-
-#define ENV_SIZE 1000
 
 enum toktype {
     // parsing tokens

@@ -52,7 +52,7 @@ struct expr {
     } body;
 };
 
-// functions
+// FUNCTIONS
 struct func {
     enum type type;
     struct expr* body;
@@ -61,12 +61,12 @@ struct funenv {
     struct func env[ENV_SIZE];
 };
 
-// variables
+// VARIABLES
 struct var {
+    // what's different about a variable and a function?
+    // the body of a variable is evalulated at compile time
     enum type type;
-    union {
-        int integer;
-    } value;
+    struct expr* body;
 };
 struct varenv {
     struct var env[ENV_SIZE];
@@ -89,5 +89,11 @@ expr_init(void);
 
 void
 expr_free(struct expr* e);
+
+void
+funenv_free(struct funenv* fenv);
+
+void
+varenv_free(struct varenv* venv);
 
 #endif

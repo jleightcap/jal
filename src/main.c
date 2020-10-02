@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -35,6 +36,11 @@ main(int ac, char** av) {
     struct funenv fenv;        // function environment
     struct varenv venv_global; // global variable environment
     setstream(file, sb.st_size);
+    memset(fenv.env, 0, sizeof(fenv.env));
+    memset(venv_global.env, 0, sizeof(venv_global.env));
     parse(&fenv, &venv_global);
     emit(outf, &fenv, &venv_global);
+
+    funenv_free(&fenv);
+    varenv_free(&venv_global);
 }
