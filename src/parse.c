@@ -68,9 +68,11 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
             // doesn't this inner switch seem stupid and redundant? probably.
             // want a common body - this seems most easily understandable
             switch(currtok.type) {
-            case ADD: e->body.binary.op = PLUS;  break;
-            case SUB: e->body.binary.op = MINUS; break;
-            default: exit(-1);
+            case ADD: e->body.binary.op = PLUS;   break;
+            case SUB: e->body.binary.op = MINUS;  break;
+            case MUL: e->body.binary.op = TIMES;  break;
+            case DIV: e->body.binary.op = DIVIDE; break;
+            default: fprintf(stderr, "Unsupported binary op!\n"); exit(-1);
             }
             e->type = BINARY;
 

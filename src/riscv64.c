@@ -57,6 +57,12 @@ emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* 
         case MINUS:
             emit("\tsub\ta0, t0, t1\n");
             break;
+        case TIMES:
+            emit("\tmul\ta0, t0, t1\n");
+            break;
+        case DIVIDE:
+            emit("\tdiv\ta0, t0, t1\n");
+            break;
         default:
             fprintf(stderr, "TODO: binary op\n"); exit(-1);
         }

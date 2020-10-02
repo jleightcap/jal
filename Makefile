@@ -24,5 +24,6 @@ memtest: $(BIN)
 	cat -n $(VALGRIND)
 
 clean:
-	rm -f src/*.o *.bin test/*.bin $(BIN) $(VALGRIND)
+	rm -f src/*.o *.bin test/*.bin ./*.s $(BIN) $(VALGRIND)
+
 .PHONY: clean
