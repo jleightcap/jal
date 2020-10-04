@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "eval.h"
 #include "riscv64.h"
 #include "parse.h"
 #include "util.h"
@@ -92,8 +93,22 @@ emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv)
     emit("\t.globl _start\n");
     emit("_start:\n");
 
-    struct expr* mainexp = fenv->env[main].body;
-    emit_expr(mainexp, fenv, venv);
+    struct expr* mainexpr = fenv->env[main].body;
+
+    // TODO: actual expression support!
+    // - register allocation algorithms
+    // - functions calls
+    // - etc.
+    //emit_expr(mainexp, fenv, venv);
+
+    // TEMPORARY:
+    char strbuf[100];
+    struct expr ans = eval(LITERAL_INT, mainexpr, fenv, venv);
+    sprintf(strbuf, "%d", ans.body.val);
+    emit("\taddi\ta0, x0, ");
+    emit(strbuf);
+    emit("\n");
+    // END
 
     emit("\taddi\ta7, x0, 93\n");
     reg_state.reg[A7] = true;

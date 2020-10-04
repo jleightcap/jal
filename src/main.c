@@ -48,14 +48,12 @@ main(int ac, char** av) {
 
     unsigned long main = hashstr("main");
     struct expr* mainexpr = fenv.env[main].body;
+
+    // print 'main' expression tree
     print_expr(mainexpr, 0);
-    /*
-    struct expr ans = eval(LITERAL_INT, mainexp, &fenv, &venv);
-    printf("ans = %d\n", ans.body.val);
-    */
 
+    // emit assembly from 'main' expression tree entrypoint
     emit(outf, &fenv, &venv);
-
 
     funenv_free(&fenv);
     varenv_free(&venv);

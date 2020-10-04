@@ -5,6 +5,9 @@
 #include "eval.h"
 #include "parse.h"
 
+#define typeassert(expr, t) \
+    assert(expr.type == t && "type mismatch!");
+
 struct expr
 eval(const enum exprtype t, const struct expr* e,
      const struct funenv* fenv, const struct varenv* venv)
@@ -14,17 +17,16 @@ eval(const enum exprtype t, const struct expr* e,
     struct expr arg2;
 
     ans.type = t;
-    switch(ans.type) {
+    switch(e->type) {
     case UNARY:
         fprintf(stderr, "TODO: unary expression eval\n"); exit(-1);
         break;
     case BINARY:
         arg1 = eval(t, e->body.binary.arg1, fenv, venv);
         arg2 = eval(t, e->body.binary.arg2, fenv, venv);
-        printf("two args: %d %d\n", arg1.body.val, arg1.body.val);
         switch(e->body.binary.op) {
             case PLUS:
-                assert(ans.type == LITERAL_INT && "adding not integers!");
+                typeassert(ans, LITERAL_INT);
                 ans.body.val = arg1.body.val + arg2.body.val;
                 break;
             case MINUS:
@@ -49,6 +51,7 @@ eval(const enum exprtype t, const struct expr* e,
     return ans;
 }
 
+// print a nice looking indent
 #define indt(x) \
     for(int ii = 0; ii < 2*x; ii++) \
         printf(" "); \

@@ -82,7 +82,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         switch(currtok.type) {
         // intrinsic binary ops
         case ADD: case SUB: case MUL: case DIV:
-            printf("intrinsic binary op\n");
+            //printf("intrinsic binary op\n");
             // doesn't this inner switch seem stupid and redundant? probably.
             // want a common body - this seems most easily understandable
             switch(currtok.type) {
@@ -113,7 +113,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
 
     // ATOMS
     case NUM:
-        printf("number literal: %d\n", currtok.value.num);
+        //printf("number literal: %d\n", currtok.value.num);
         e->type = LITERAL_INT;
         e->body.val = currtok.value.num;
         return;
@@ -123,7 +123,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         // lookup symbol in variable environment
         e->type = LITERAL_INT; // TODO: evaluate expression
         e->body.val = venv->env[currtok.value.hash].body->body.val;
-        printf("symbol: %d\n", e->body.val);
+        //printf("symbol: %d\n", e->body.val);
         return;
 
     default:
@@ -201,12 +201,12 @@ parse(struct funenv* fenv, struct varenv* venv)
         switch(currtok.type) {
             // function definition
             case DEFUN:
-                printf("defun\n");
+                //printf("defun\n");
                 parse_defun(fenv, venv);
                 break;
             // variable definition
             case DEVAR:
-                printf("devar\n");
+                //printf("devar\n");
                 parse_devar(fenv, venv);
                 break;
             default:
