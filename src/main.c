@@ -8,6 +8,7 @@
 #include <fcntl.h>
 
 #include "emit.h"
+#include "eval.h"
 #include "parse.h"
 #include "util.h"
 
@@ -37,13 +38,26 @@ main(int ac, char** av) {
     }
 
     struct funenv fenv;        // function environment
-    struct varenv venv_global; // global variable environment
+    struct varenv venv; // global variable environment
+    // zero out environments
     memset(fenv.env, 0, sizeof(fenv.env));
-    memset(venv_global.env, 0, sizeof(venv_global.env));
+    memset(venv.env, 0, sizeof(venv.env));
     setstream(file, sb.st_size);
-    parse(&fenv, &venv_global);
-    emit(outf, &fenv, &venv_global);
+
+    parse(&fenv, &venv);
+
+    unsigned long main = hashstr("main");
+    struct expr* mainexpr = fenv.env[main].body;
+    print_expr(mainexpr, 0);
+    /*
+    struct expr ans = eval(LITERAL_INT, mainexp, &fenv, &venv);
+    printf("ans = %d\n", ans.body.val);
+    */
+
+    emit(outf, &fenv, &venv);
+
 
     funenv_free(&fenv);
-    varenv_free(&venv_global);
+    varenv_free(&venv);
+
 }

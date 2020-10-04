@@ -9,7 +9,7 @@ VALGRIND = valgrind.out
 $(BIN): $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
-%o: %c $(wildcard $(INCLUDE)/*.h)
+%.o: %.c $(wildcard $(INCLUDE)/*.h)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.o: %.s

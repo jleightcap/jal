@@ -1,5 +1,5 @@
 # function with no arguments, maybe void?
 (defun (main int)
-    (ret (+ 40 (- 7 5)))
+    (ret (+ (* 8 5) (- 101 99)))
 )
 # wee comments everywhere

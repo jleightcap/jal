@@ -14,7 +14,7 @@ enum type {
     INT
 };
 
-
+// tokens that map direction to function
 enum intrinsic {
     PLUS,
     MINUS,
@@ -96,5 +96,8 @@ funenv_free(struct funenv* fenv);
 
 void
 varenv_free(struct varenv* venv);
+
+enum type
+typetok_to_type(const enum toktype t);
 
 #endif
