@@ -37,13 +37,13 @@ expr_free(struct expr* e)
 {
     switch(e->type) {
     case UNARY:
-        expr_free(e->body.unary.arg);
+        expr_free(e->expression.unary.arg);
         break;
     case BINARY:
-        expr_free(e->body.binary.arg1);
-        expr_free(e->body.binary.arg2);
+        expr_free(e->expression.binary.arg1);
+        expr_free(e->expression.binary.arg2);
         break;
-    case LITERAL_INT:
+    case LITERAL:
         break;
     }
     free(e);
@@ -82,22 +82,22 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
             // doesn't this inner switch seem stupid and redundant? probably.
             // want a common body - this seems most easily understandable
             switch(currtok.type) {
-            case ADD: e->body.binary.op = PLUS;   break;
-            case SUB: e->body.binary.op = MINUS;  break;
-            case MUL: e->body.binary.op = TIMES;  break;
-            case DIV: e->body.binary.op = DIVIDE; break;
+            case ADD: e->expression.binary.op = PLUS;   break;
+            case SUB: e->expression.binary.op = MINUS;  break;
+            case MUL: e->expression.binary.op = TIMES;  break;
+            case DIV: e->expression.binary.op = DIVIDE; break;
             default: fprintf(stderr, "Unsupported binary op!\n"); exit(-1);
             }
             e->type = BINARY;
 
             // initialize arg1, associated with same parse arguments
-            e->body.binary.arg1 = expr_init();
+            e->expression.binary.arg1 = expr_init();
             currtok = scan();
-            parse_expr(name, e->body.binary.arg1, fenv, venv);
+            parse_expr(name, e->expression.binary.arg1, fenv, venv);
             // initialize arg2, associated with same parse arguments
-            e->body.binary.arg2 = expr_init();
+            e->expression.binary.arg2 = expr_init();
             currtok = scan();
-            parse_expr(name, e->body.binary.arg2, fenv, venv);
+            parse_expr(name, e->expression.binary.arg2, fenv, venv);
 
             currtok = scan();
             checktok(currtok, RPAREN, "intrinsic binary ops: too many arguments?");
@@ -110,15 +110,15 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
     // ATOMS
     case NUM:
         //printf("number literal: %d\n", currtok.value.num);
-        e->type = LITERAL_INT;
-        e->body.val = currtok.value.num;
+        e->type = LITERAL;
+        e->expression.literal.litval.integer = currtok.value.num;
         return;
 
     // VARIABLE
     case SYM:
         // lookup symbol in variable environment
-        e->type = LITERAL_INT; // TODO: evaluate expression
-        e->body.val = venv->env[currtok.value.hash].body.body.val;
+        e->type = LITERAL; // TODO: evaluate expression
+        e->expression.literal.litval.integer = venv->env[currtok.value.hash].body.expression.literal.litval.integer;
         //printf("symbol: %d\n", e->body.val);
         return;
 
@@ -147,7 +147,7 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
     struct expr* e = expr_init();
     parse_expr(name, e, fenv, venv);
 
-    struct expr ans = eval(e->type, e, fenv, venv);
+    struct expr ans = eval(t, e, fenv, venv);
     expr_free(e);
 
     venv->env[name].type = t;

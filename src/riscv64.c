@@ -49,9 +49,9 @@ emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* 
     char strbuf[100];
     switch(e->type) {
     case BINARY:
-        emit_expr(e->body.binary.arg1, fenv, venv);
-        emit_expr(e->body.binary.arg2, fenv, venv);
-        switch(e->body.binary.op) {
+        emit_expr(e->expression.binary.arg1, fenv, venv);
+        emit_expr(e->expression.binary.arg2, fenv, venv);
+        switch(e->expression.binary.op) {
         case PLUS:
             emit("\tadd\ta0, t0, t1\n");
             break;
@@ -68,8 +68,8 @@ emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* 
             fprintf(stderr, "TODO: binary op\n"); exit(-1);
         }
         break;
-    case LITERAL_INT:
-        sprintf(strbuf, "%d", e->body.val);
+    case LITERAL:
+        sprintf(strbuf, "%d", e->expression.literal.litval.integer);
         emit("\taddi\t");
         // emit proper register
         emit_tmp();
@@ -103,8 +103,8 @@ emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv)
 
     // TEMPORARY:
     char strbuf[100];
-    struct expr ans = eval(LITERAL_INT, mainexpr, fenv, venv);
-    sprintf(strbuf, "%d", ans.body.val);
+    struct expr ans = eval(INT, mainexpr, fenv, venv);
+    sprintf(strbuf, "%d", ans.expression.literal.litval.integer);
     emit("\taddi\ta0, x0, ");
     emit(strbuf);
     emit("\n");

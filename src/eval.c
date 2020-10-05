@@ -37,19 +37,19 @@ eval(const enum type t, const struct expr* e,
                 typeassert(ans, INT);
                 argval[0] = args[0].expression.literal.litval.integer;
                 argval[1] = args[1].expression.literal.litval.integer;
-                ans.expression.literal.litval.integer = argval[0] + argval[1];
+                ans.expression.literal.litval.integer = argval[0] - argval[1];
                 break;
             case TIMES:
                 typeassert(ans, INT);
                 argval[0] = args[0].expression.literal.litval.integer;
                 argval[1] = args[1].expression.literal.litval.integer;
-                ans.expression.literal.litval.integer = argval[0] + argval[1];
+                ans.expression.literal.litval.integer = argval[0] * argval[1];
                 break;
             case DIVIDE:
                 typeassert(ans, INT);
                 argval[0] = args[0].expression.literal.litval.integer;
                 argval[1] = args[1].expression.literal.litval.integer;
-                ans.expression.literal.litval.integer = argval[0] + argval[1];
+                ans.expression.literal.litval.integer = argval[0] / argval[1];
                 break;
         }
         break;
