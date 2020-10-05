@@ -8,7 +8,7 @@
 // all (defun ...) declarations must be deduced to a literal type at
 // compile time.
 struct expr
-eval(const enum exprtype t, const struct expr* e,
+eval(const enum type t, const struct expr* e,
      const struct funenv* fenv, const struct varenv* venv);
 
 void

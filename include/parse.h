@@ -28,9 +28,10 @@ enum exprtype {
     BINARY,
 
     // literal expression
-    LITERAL_INT
+    LITERAL
 };
 
+// an expression
 struct expr {
     enum exprtype type;
     union {
@@ -47,9 +48,14 @@ struct expr {
             struct expr* arg2;
         } binary;
 
-        // LITERAL_INT
-        int val;
-    } body;
+        // LITERALS
+        struct {
+            enum type t;
+            union {
+                int integer;
+            } litval;
+        } literal;
+    } expression;
 };
 
 // FUNCTIONS
@@ -63,10 +69,8 @@ struct funenv {
 
 // VARIABLES
 struct var {
-    // what's different about a variable and a function?
-    // the body of a variable is evalulated at compile time
     enum type type;
-    struct expr* body;
+    struct expr body;
 };
 struct varenv {
     struct var env[ENV_SIZE];

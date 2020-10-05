@@ -5,46 +5,56 @@
 #include "eval.h"
 #include "parse.h"
 
-#define typeassert(expr, t) \
-    assert(expr.type == t && "type mismatch!");
+#define typeassert(expr, type) \
+    assert(expr.expression.literal.t == type && "type mismatch!");
+
+#define MAXARGS 10
 
 struct expr
-eval(const enum exprtype t, const struct expr* e,
+eval(const enum type t, const struct expr* e,
      const struct funenv* fenv, const struct varenv* venv)
 {
     struct expr ans;
-    struct expr arg1;
-    struct expr arg2;
+    struct expr args[MAXARGS];
+    int argval[MAXARGS];
 
-    ans.type = t;
+    ans.expression.literal.t = t;
     switch(e->type) {
     case UNARY:
         fprintf(stderr, "TODO: unary expression eval\n"); exit(-1);
         break;
     case BINARY:
-        arg1 = eval(t, e->body.binary.arg1, fenv, venv);
-        arg2 = eval(t, e->body.binary.arg2, fenv, venv);
-        switch(e->body.binary.op) {
+        args[0] = eval(t, e->expression.binary.arg1, fenv, venv);
+        args[1] = eval(t, e->expression.binary.arg2, fenv, venv);
+        switch(e->expression.binary.op) {
             case PLUS:
-                typeassert(ans, LITERAL_INT);
-                ans.body.val = arg1.body.val + arg2.body.val;
+                typeassert(ans, INT);
+                argval[0] = args[0].expression.literal.litval.integer;
+                argval[1] = args[1].expression.literal.litval.integer;
+                ans.expression.literal.litval.integer = argval[0] + argval[1];
                 break;
             case MINUS:
-                assert(ans.type == LITERAL_INT && "adding not integers!");
-                ans.body.val = arg1.body.val - arg2.body.val;
+                typeassert(ans, INT);
+                argval[0] = args[0].expression.literal.litval.integer;
+                argval[1] = args[1].expression.literal.litval.integer;
+                ans.expression.literal.litval.integer = argval[0] + argval[1];
                 break;
             case TIMES:
-                assert(ans.type == LITERAL_INT && "adding not integers!");
-                ans.body.val = arg1.body.val * arg2.body.val;
+                typeassert(ans, INT);
+                argval[0] = args[0].expression.literal.litval.integer;
+                argval[1] = args[1].expression.literal.litval.integer;
+                ans.expression.literal.litval.integer = argval[0] + argval[1];
                 break;
             case DIVIDE:
-                assert(ans.type == LITERAL_INT && "adding not integers!");
-                ans.body.val = arg1.body.val / arg2.body.val;
+                typeassert(ans, INT);
+                argval[0] = args[0].expression.literal.litval.integer;
+                argval[1] = args[1].expression.literal.litval.integer;
+                ans.expression.literal.litval.integer = argval[0] + argval[1];
                 break;
         }
         break;
-    case LITERAL_INT:
-        ans.body.val = e->body.val;
+    case LITERAL:
+        ans.expression.literal.litval.integer = e->expression.literal.litval.integer;
         break;
     }
 
@@ -65,7 +75,7 @@ print_expr(const struct expr* e, int nest)
     case UNARY:
         break;
     case BINARY:
-        switch(e->body.binary.op) {
+        switch(e->expression.binary.op) {
         case PLUS:
             printf("'+'");
             break;
@@ -80,11 +90,12 @@ print_expr(const struct expr* e, int nest)
             break;
         }
         printf(" :binop\n");
-        print_expr(e->body.binary.arg1, nest + 1);
-        print_expr(e->body.binary.arg2, nest + 1);
+        print_expr(e->expression.binary.arg1, nest + 1);
+        print_expr(e->expression.binary.arg2, nest + 1);
         break;
-    case LITERAL_INT:
-        printf("%d", e->body.val);
+    case LITERAL:
+        // TODO: switch on literal types
+        printf("%d", e->expression.literal.litval.integer);
         printf(" :litint\n");
         break;
     }

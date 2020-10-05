@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "eval.h"
 #include "parse.h"
 #include "token.h"
 
@@ -62,12 +63,7 @@ funenv_free(struct funenv* fenv)
 void
 varenv_free(struct varenv* venv)
 {
-    for(int ii = 0 ; ii < ENV_SIZE; ii++) {
-        if(venv->env[ii].body) {
-            //printf("%d:\t%p\n", ii, (void*)venv->env[ii].body);
-            expr_free(venv->env[ii].body);
-        }
-    }
+    return;
 }
 
 // parse a expression.
@@ -122,7 +118,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
     case SYM:
         // lookup symbol in variable environment
         e->type = LITERAL_INT; // TODO: evaluate expression
-        e->body.val = venv->env[currtok.value.hash].body->body.val;
+        e->body.val = venv->env[currtok.value.hash].body.body.val;
         //printf("symbol: %d\n", e->body.val);
         return;
 
@@ -142,15 +138,20 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
     currtok = scan(); // variable name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // variable type
-    venv->env[name].type = typetok_to_type(currtok.type);
+    enum type t = typetok_to_type(currtok.type);
     currtok = scan(); // )
     checktok(currtok, RPAREN, "variable signature end");
 
     // VARIABLE BODY PARSING
-    venv->env[name].body = expr_init();
-    struct expr* e = venv->env[name].body;
     currtok = scan();
+    struct expr* e = expr_init();
     parse_expr(name, e, fenv, venv);
+
+    struct expr ans = eval(e->type, e, fenv, venv);
+    expr_free(e);
+
+    venv->env[name].type = t;
+    venv->env[name].body = ans;
 
     currtok = scan();
     checktok(currtok, RPAREN, "variable defition end (match devar)");
