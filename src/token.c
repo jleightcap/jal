@@ -46,15 +46,20 @@ scan()
             fp++;
         }
         
-        // reserved keywords
-        if(hash == hashstr("main"))
-            tok.type = MAIN;
-        else if(hash == hashstr("defun"))
+        // RESERVED KEYWORDS
+        // definitions
+        if(hash == hashstr("defun"))
             tok.type = DEFUN;
         else if(hash == hashstr("devar"))
             tok.type = DEVAR;
+        // functions
+        else if(hash == hashstr("main"))
+            tok.type = MAIN;
         else if(hash == hashstr("ret"))
             tok.type = RETRN;
+        else if(hash == hashstr("print"))
+            tok.type = PRINT;
+        // types
         else if (hash == hashstr("int"))
             tok.type = TYPE_INT;
 
@@ -109,6 +114,17 @@ scan()
     if(file[fp] == '/') {
         fp++;
         tok.type = DIV;
+        return tok;
+    }
+    // string parsing
+    if(file[fp] == '"') {
+        int strpos = 0;
+        fp++;
+        while(file[fp] != '"') {
+            tok.value.str[strpos] = file[fp];
+            fp++;
+        }
+        tok.type = TYPE_STR;
         return tok;
     }
 

@@ -8,7 +8,6 @@
 #define typeassert(expr, type) \
     assert(expr.expression.literal.t == type && "type mismatch!");
 
-#define MAXARGS 10
 
 struct expr
 eval(const enum type t, const struct expr* e,

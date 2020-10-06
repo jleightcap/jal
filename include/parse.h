@@ -59,9 +59,14 @@ struct expr {
 };
 
 // FUNCTIONS
+
+#define MAXARGS 10
+#define MAXEXPRS 50
 struct func {
+    // return type
     enum type type;
-    struct expr* body;
+    unsigned int exprs;
+    struct expr* body[MAXEXPRS];
 };
 struct funenv {
     struct func env[ENV_SIZE];
@@ -70,6 +75,7 @@ struct funenv {
 // VARIABLES
 struct var {
     enum type type;
+    // note: a variable's expression body must be a literal type
     struct expr body;
 };
 struct varenv {

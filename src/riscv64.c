@@ -93,7 +93,9 @@ emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv)
     emit("\t.globl _start\n");
     emit("_start:\n");
 
-    struct expr* mainexpr = fenv->env[main].body;
+    // TODO: iterate over all expressions in main
+    // here, just take the last expression (assumed to be the return)
+    struct expr* mainexpr = fenv->env[main].body[0];
 
     // TODO: actual expression support!
     // - register allocation algorithms

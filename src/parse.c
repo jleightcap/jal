@@ -52,10 +52,14 @@ expr_free(struct expr* e)
 void
 funenv_free(struct funenv* fenv)
 {
-    for(int ii = 0; ii < ENV_SIZE; ii++) {
-        if(fenv->env[ii].body) {
-            //printf("%p\n", (void*)fenv->env[ii].body);
-            expr_free(fenv->env[ii].body);
+    // iterate over whole function environment, most is empty
+    for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
+        // found a function, has expressions
+        if(fenv->env[ii].exprs > 0) {
+            // free all expressions associated with function
+            for(unsigned int jj = 0; jj < fenv->env[ii].exprs; jj++) {
+                expr_free(fenv->env[ii].body[jj]);
+            }
         }
     }
 }
@@ -174,15 +178,15 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     checktok(currtok, RPAREN, "function signature end");
 
     // FUNCTION BODY PARSING
-    currtok = scan(); // (
-    checktok(currtok, LPAREN, "function body begin");
-    currtok = scan(); // 'return'
-    checktok(currtok, RETRN, "return declaration");
-    fenv->env[name].body = expr_init();
-    struct expr* e = fenv->env[name].body;
-    currtok = scan(); // token after 'ret'
-    parse_expr(name, e, fenv, venv);
-    currtok = scan(); // )
+    fenv->env[name].exprs = 0;
+    for(currtok = scan(); currtok.type == LPAREN; currtok = scan()) {
+        currtok = scan(); // 'return'
+        checktok(currtok, RETRN, "return declaration");
+        struct expr* e = (fenv->env[name].body[fenv->env[name].exprs] = expr_init());
+        currtok = scan(); // token after 'ret'
+        parse_expr(name, e, fenv, venv);
+        fenv->env[name].exprs += 1;
+    }
     checktok(currtok, RPAREN, "function body end");
 
     currtok = scan();

@@ -20,15 +20,17 @@ enum toktype {
     SYM,                // symbol
 
     // reserved symbols
-    MAIN,               // (main int) [args]
     DEFUN,              // (defun [signature] [body])
-    DEVAR,              //  (defar [var] [body])
+    DEVAR,              // (defar [var] [body])
+    MAIN,               // (main int) [args]
     RETRN,              // (return [expr])
     TRUE,               // "true"
     FALSE,              // "false"
+    PRINT,              // "print"
 
     // TYPES
     TYPE_INT,           // "int" integer type
+    TYPE_STR,           // "string" type
 
     // binary operators
     ADD,                // (+ a b)
@@ -46,11 +48,13 @@ enum toktype {
     LE                  // (<= a b)
 };
 
+#define MAX_STRLEN 100
 struct token {
     enum toktype type;
     union {
         int num;
         long hash;
+        char str[MAX_STRLEN];
     } value;
 };
 

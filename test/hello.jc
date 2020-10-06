@@ -1,0 +1,4 @@
+(defun (main int)
+    (print "hello world!")
+    (ret 0)
+)
