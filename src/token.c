@@ -22,7 +22,6 @@ scan()
     assert(file != NULL && "file stream not initialized: use setstream!");
     assert(len  != 0    && "len not initialized: use setstream!");
 
-    int numlit;
     struct token tok;
 
     // skip whitespace and comments ('#' to '\n' or EOF)
@@ -52,6 +51,7 @@ scan()
             tok.type = DEFUN;
         else if(hash == hashstr("devar"))
             tok.type = DEVAR;
+
         // functions
         else if(hash == hashstr("main"))
             tok.type = MAIN;
@@ -59,6 +59,7 @@ scan()
             tok.type = RETRN;
         else if(hash == hashstr("print"))
             tok.type = PRINT;
+
         // types
         else if (hash == hashstr("int"))
             tok.type = TYPE_INT;
@@ -71,15 +72,46 @@ scan()
         tok.value.hash = hash;
         return tok;
     }
+
     // integer literals
     if(isnum(file[fp])) {
-        numlit = 0;
+        int numlit = 0;
         while(isnum(file[fp]))
             numlit = (numlit * 10) + file[fp++] - '0';
         tok.type = NUM;
         tok.value.num = numlit;
         return tok;
     }
+    // string literals
+    if(file[fp] == '"') {
+        unsigned int strpos = 0;
+        fp++;
+        while(file[fp] != '"') {
+            switch(file[fp]) {
+            // escape characters
+            case '\\':
+                switch(file[++fp]) {
+                case 'n':
+                    tok.value.str[strpos] = '\n';
+                    break;
+                default:
+                    fprintf(stderr, "unexpected escape sequence!\n"); exit(-1);
+                }
+                break;
+            // non-escape characters
+            default:
+                tok.value.str[strpos] = file[fp];
+                break;
+            }
+            assert(strpos < MAX_STRLEN && "exceeded string buffer: increase MAX_STRLEN!");
+            strpos++; fp++;
+        }
+        fp++;
+        tok.value.str[strpos] = '\0';
+        tok.type = STR;
+        return tok;
+    }
+
     // lparen
     if(file[fp] == '(') {
         fp++;
@@ -114,17 +146,6 @@ scan()
     if(file[fp] == '/') {
         fp++;
         tok.type = DIV;
-        return tok;
-    }
-    // string parsing
-    if(file[fp] == '"') {
-        int strpos = 0;
-        fp++;
-        while(file[fp] != '"') {
-            tok.value.str[strpos] = file[fp];
-            fp++;
-        }
-        tok.type = TYPE_STR;
         return tok;
     }
 

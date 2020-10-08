@@ -18,7 +18,7 @@ eval(const enum type t, const struct expr* e,
     int argval[MAXARGS];
 
     ans.expression.literal.t = t;
-    switch(e->type) {
+    switch(e->exptype) {
     case UNARY:
         fprintf(stderr, "TODO: unary expression eval\n"); exit(-1);
         break;
@@ -70,7 +70,7 @@ void
 print_expr(const struct expr* e, int nest)
 {
     indt(nest);
-    switch(e->type) {
+    switch(e->exptype) {
     case UNARY:
         break;
     case BINARY:
@@ -87,6 +87,8 @@ print_expr(const struct expr* e, int nest)
         case DIVIDE:
             printf("'/'");
             break;
+        default:
+            fprintf(stderr, "function calls are sad rn sorry\n"); exit(-1);
         }
         printf(" :binop\n");
         print_expr(e->expression.binary.arg1, nest + 1);

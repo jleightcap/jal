@@ -47,7 +47,7 @@ void
 emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* venv)
 {
     char strbuf[100];
-    switch(e->type) {
+    switch(e->exptype) {
     case BINARY:
         emit_expr(e->expression.binary.arg1, fenv, venv);
         emit_expr(e->expression.binary.arg2, fenv, venv);

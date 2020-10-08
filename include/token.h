@@ -15,9 +15,14 @@ enum toktype {
     RPAREN,             // ')'
     END,                // EOF
 
+    // type declarations
+    TYPE_INT,           // "int" integer type
+    TYPE_STR,           // "string" type
+
     // atoms
-    NUM,                // number
     SYM,                // symbol
+    NUM,                // number
+    STR,                // string
 
     // reserved symbols
     DEFUN,              // (defun [signature] [body])
@@ -28,9 +33,6 @@ enum toktype {
     FALSE,              // "false"
     PRINT,              // "print"
 
-    // TYPES
-    TYPE_INT,           // "int" integer type
-    TYPE_STR,           // "string" type
 
     // binary operators
     ADD,                // (+ a b)
@@ -52,9 +54,11 @@ enum toktype {
 struct token {
     enum toktype type;
     union {
+        // literals
         int num;
+        char str[MAX_STRLEN + 1]; // add slot at end for null terminator
+        // symbol hash
         long hash;
-        char str[MAX_STRLEN];
     } value;
 };
 

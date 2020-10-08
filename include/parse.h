@@ -11,7 +11,8 @@
 
 // types assigned to symbols
 enum type {
-    INT
+    INT,
+    STRING
 };
 
 // tokens that map direction to function
@@ -19,7 +20,10 @@ enum intrinsic {
     PLUS,
     MINUS,
     TIMES,
-    DIVIDE
+    DIVIDE,
+
+    I_PRINT,
+    I_RETRN
 };
 
 enum exprtype {
@@ -28,12 +32,12 @@ enum exprtype {
     BINARY,
 
     // literal expression
-    LITERAL
+    LITERAL,
 };
 
 // an expression
 struct expr {
-    enum exprtype type;
+    enum exprtype exptype;
     union {
         // UNARY
         struct {
@@ -53,6 +57,7 @@ struct expr {
             enum type t;
             union {
                 int integer;
+                char string[MAX_STRLEN];
             } litval;
         } literal;
     } expression;

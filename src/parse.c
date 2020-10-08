@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +22,8 @@ typetok_to_type(const enum toktype t)
     switch(t) {
     case TYPE_INT:
         return INT;
+    case TYPE_STR:
+        return STRING;
     default:
         fprintf(stderr, "type not recognized!\n"); exit(-1);
     }
@@ -35,7 +38,7 @@ expr_init(void)
 void
 expr_free(struct expr* e)
 {
-    switch(e->type) {
+    switch(e->exptype) {
     case UNARY:
         expr_free(e->expression.unary.arg);
         break;
@@ -52,9 +55,9 @@ expr_free(struct expr* e)
 void
 funenv_free(struct funenv* fenv)
 {
-    // iterate over whole function environment, most is empty
+    // iterate over whole function environment, most is probably empty
     for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
-        // found a function, has expressions
+        // found a function; has expressions
         if(fenv->env[ii].exprs > 0) {
             // free all expressions associated with function
             for(unsigned int jj = 0; jj < fenv->env[ii].exprs; jj++) {
@@ -71,7 +74,7 @@ varenv_free(struct varenv* venv)
 }
 
 // parse a expression.
-// tokenizing begins after RETN token.
+// tokenizing begins with currtok at opening LPAREN
 void
 parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
@@ -81,19 +84,23 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         currtok = scan(); // operator
         switch(currtok.type) {
         // intrinsic binary ops
-        case ADD: case SUB: case MUL: case DIV:
-            //printf("intrinsic binary op\n");
-            // doesn't this inner switch seem stupid and redundant? probably.
-            // want a common body - this seems most easily understandable
-            switch(currtok.type) {
-            case ADD: e->expression.binary.op = PLUS;   break;
-            case SUB: e->expression.binary.op = MINUS;  break;
-            case MUL: e->expression.binary.op = TIMES;  break;
-            case DIV: e->expression.binary.op = DIVIDE; break;
-            default: fprintf(stderr, "Unsupported binary op!\n"); exit(-1);
-            }
-            e->type = BINARY;
-
+        case ADD:
+            e->expression.binary.op = PLUS;
+            goto intrinsic_binops;
+        case SUB:
+            e->expression.binary.op = MINUS;
+            goto intrinsic_binops;
+        case MUL:
+            e->expression.binary.op = TIMES;
+            goto intrinsic_binops;
+        case DIV:
+            e->expression.binary.op = DIVIDE;
+            goto intrinsic_binops;
+        default:
+            fprintf(stderr, "Unsupported binary op!\n"); exit(-1);
+        }
+        intrinsic_binops:
+            e->exptype = BINARY;
             // initialize arg1, associated with same parse arguments
             e->expression.binary.arg1 = expr_init();
             currtok = scan();
@@ -106,30 +113,43 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
             currtok = scan();
             checktok(currtok, RPAREN, "intrinsic binary ops: too many arguments?");
             return;
-        default:
-            fprintf(stderr, "unexpected operator!\n"); exit(-1);
-        }
-        return;
 
     // ATOMS
     case NUM:
-        //printf("number literal: %d\n", currtok.value.num);
-        e->type = LITERAL;
+        e->exptype = LITERAL;
         e->expression.literal.litval.integer = currtok.value.num;
+        return;
+    case STR:
+        e->exptype = LITERAL;
+        memcpy(e->expression.literal.litval.string, currtok.value.str, MAX_STRLEN);
         return;
 
     // VARIABLE
     case SYM:
         // lookup symbol in variable environment
-        e->type = LITERAL; // TODO: evaluate expression
+        e->exptype = LITERAL; // TODO: evaluate expression
         e->expression.literal.litval.integer = venv->env[currtok.value.hash].body.expression.literal.litval.integer;
-        //printf("symbol: %d\n", e->body.val);
         return;
 
+    // RESERVED FUNCTIONS
+    case PRINT:
+        e->exptype = UNARY;
+        e->expression.unary.op = I_PRINT;
+        currtok = scan();
+        parse_expr(name, e, fenv, venv);
+        break;
+    case RETRN:
+        e->exptype = UNARY;
+        e->expression.unary.op = I_RETRN;
+        currtok = scan();
+        parse_expr(name, e, fenv, venv);
+        break;
+
     default:
-        fprintf(stderr, "unexpected expression!\n"); exit(-1);
+        fprintf(stderr, "%d unexpected expression!\n", currtok.type); exit(-1);
     }
 
+    currtok = scan();
     checktok(currtok, RPAREN, "expression end");
 }
 
@@ -180,13 +200,13 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     // FUNCTION BODY PARSING
     fenv->env[name].exprs = 0;
     for(currtok = scan(); currtok.type == LPAREN; currtok = scan()) {
-        currtok = scan(); // 'return'
-        checktok(currtok, RETRN, "return declaration");
+        printf("expression %d\n", fenv->env[name].exprs);
         struct expr* e = (fenv->env[name].body[fenv->env[name].exprs] = expr_init());
-        currtok = scan(); // token after 'ret'
+        currtok = scan(); // function name
         parse_expr(name, e, fenv, venv);
         fenv->env[name].exprs += 1;
     }
+    assert(fenv->env[name].exprs > 0 && "function must have a body!");
     checktok(currtok, RPAREN, "function body end");
 
     currtok = scan();
