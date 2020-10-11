@@ -137,17 +137,19 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
     // symbol not preceded by LPAREN must be a variable reference
     case SYM:
         e->exprtype = LITERAL;
+        assert(venv->env[currtok.value.hash].body != NULL && "variable does not exist in this scope!");
         struct lit lit = venv->env[currtok.value.hash].body->e.lit;
         e->e.lit.t = lit.t;
         switch(lit.t) {
         case INT:
+            printf("found intlit!\n");
             e->e.lit.litval.integer = lit.litval.integer;
             break;
         case STRING:
             memcpy(e->e.lit.litval.string, lit.litval.string, MAX_STRLEN);
             break;
         case VOID:
-            break;
+            panic("cannot reference a void type!");
         }
         break;
 
@@ -185,6 +187,10 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
     currtok = scan();
     struct expr* e = (venv->env[name].body = expr_init());
     parse_expr(name, e, fenv, venv);
+
+    // Evaluate body to a literal type
+    struct lit ans = eval(venv->env[name].t, e, fenv, venv);
+    venv->env[name].body->e.lit = ans;
 
     currtok = scan();
     checktok(currtok, RPAREN, "function declaration end (match defun)");

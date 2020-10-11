@@ -4,61 +4,56 @@
 
 #include "eval.h"
 #include "parse.h"
+#include "util.h"
 
-/*
-#define typeassert(expr, type) \
-    assert(expr.expression.literal.t == type && "type mismatch!");
+struct lit
+eval_int(const struct expr* e, const struct funenv* fenv, const struct varenv* venv)
+{
+}
 
-
-struct expr
+struct lit
 eval(const enum type t, const struct expr* e,
      const struct funenv* fenv, const struct varenv* venv)
 {
-    struct expr ans;
-    struct expr args[MAXARGS];
-    int argval[MAXARGS];
-
-    ans.expression.literal.t = t;
-    switch(e->exptype) {
-    case UNARY:
-        fprintf(stderr, "TODO: unary expression eval\n"); exit(-1);
-        break;
-    case BINARY:
-        args[0] = eval(t, e->expression.binary.arg1, fenv, venv);
-        args[1] = eval(t, e->expression.binary.arg2, fenv, venv);
-        switch(e->expression.binary.op) {
-            case PLUS:
-                typeassert(ans, INT);
-                argval[0] = args[0].expression.literal.litval.integer;
-                argval[1] = args[1].expression.literal.litval.integer;
-                ans.expression.literal.litval.integer = argval[0] + argval[1];
+    struct lit lit;
+    struct lit args[MAXARGS];
+    lit.t = t;
+    switch(e->exprtype) {
+        case FUNCTION:
+            switch(e->e.func.ft) {
+            case BUILTIN:
+                args[0] = eval(t, e->e.func.body[0], fenv, venv);
+                args[1] = eval(t, e->e.func.body[1], fenv, venv);
+                switch(e->e.func.name.b) {
+                case F_ADD:
+                    lit.litval.integer =
+                        args[0].litval.integer + args[1].litval.integer;
+                    break;
+                case F_SUB:
+                    lit.litval.integer =
+                        args[0].litval.integer - args[1].litval.integer;
+                    break;
+                case F_MUL:
+                    lit.litval.integer =
+                        args[0].litval.integer * args[1].litval.integer;
+                    break;
+                case F_DIV:
+                    lit.litval.integer =
+                        args[0].litval.integer / args[1].litval.integer;
+                    break;
+                case F_MOD:
+                    lit.litval.integer =
+                        args[0].litval.integer % args[1].litval.integer;
+                    break;
+                }
                 break;
-            case MINUS:
-                typeassert(ans, INT);
-                argval[0] = args[0].expression.literal.litval.integer;
-                argval[1] = args[1].expression.literal.litval.integer;
-                ans.expression.literal.litval.integer = argval[0] - argval[1];
-                break;
-            case TIMES:
-                typeassert(ans, INT);
-                argval[0] = args[0].expression.literal.litval.integer;
-                argval[1] = args[1].expression.literal.litval.integer;
-                ans.expression.literal.litval.integer = argval[0] * argval[1];
-                break;
-            case DIVIDE:
-                typeassert(ans, INT);
-                argval[0] = args[0].expression.literal.litval.integer;
-                argval[1] = args[1].expression.literal.litval.integer;
-                ans.expression.literal.litval.integer = argval[0] / argval[1];
-                break;
-        }
-        break;
-    case LITERAL:
-        ans.expression.literal.litval.integer = e->expression.literal.litval.integer;
-        break;
+            case TABLE:
+                panic("TODO: eval functions!");
+            }
+            break;
+        case LITERAL:
+            lit = e->e.lit;
+            break;
     }
-
-    return ans;
+    return lit;
 }
-*/
-

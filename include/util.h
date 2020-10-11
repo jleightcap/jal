@@ -7,6 +7,9 @@
 #define panic(str) \
     fputs(str, stderr); exit(-1);
 
+#define typeassert(expr, type) \
+    assert(expr.expression.literal.t == type && "type mismatch!");
+
 int
 iswhitespace(char c);
 
