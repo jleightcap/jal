@@ -126,7 +126,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
             break;
 
         case SYM:
-            panic("TODO: variables!");
+            panic("TODO: defun lookups!");
         default:
             panic("unexpected function!");
         }
@@ -137,7 +137,18 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
     // symbol not preceded by LPAREN must be a variable reference
     case SYM:
         e->exprtype = LITERAL;
-        panic("TODO: variable reference");
+        struct lit lit = venv->env[currtok.value.hash].body->e.lit;
+        e->e.lit.t = lit.t;
+        switch(lit.t) {
+        case INT:
+            e->e.lit.litval.integer = lit.litval.integer;
+            break;
+        case STRING:
+            memcpy(e->e.lit.litval.string, lit.litval.string, MAX_STRLEN);
+            break;
+        case VOID:
+            break;
+        }
         break;
 
     // atoms
@@ -166,12 +177,17 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
     currtok = scan(); // variable name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // variable type
-    enum type t = typetok_to_type(currtok.type);
+    venv->env[name].t = typetok_to_type(currtok.type);
     currtok = scan(); // )
     checktok(currtok, RPAREN, "variable signature end");
 
     // VARIABLE BODY PARSING
-    // TODO!
+    currtok = scan();
+    struct expr* e = (venv->env[name].body = expr_init());
+    parse_expr(name, e, fenv, venv);
+
+    currtok = scan();
+    checktok(currtok, RPAREN, "function declaration end (match defun)");
 }
 
 // parse a function definition.

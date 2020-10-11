@@ -66,15 +66,17 @@ print_builtin(const enum builtin b)
         printf(" "); \
     printf("\033[1m\033[32m|-\033[m");
 
+// print a top-level defun, calls print_expr on each body expression
 void
 print_func(const struct func* f, const unsigned int nest) {
     indt(nest);
-    printf("func %ld -> ", f->name.hash); print_type(f->t); printf("\n");
+    printf("defun %ld -> ", f->name.hash); print_type(f->t); printf("\n");
     for(unsigned int ii = 0; ii < f->exprs; ii++) {
         print_expr(f->body[ii], nest + 1);
     }
 }
 
+// recursively print an expression.
 void
 print_expr(const struct expr* e, const unsigned int nest)
 {
@@ -83,10 +85,12 @@ print_expr(const struct expr* e, const unsigned int nest)
     case FUNCTION:
         switch(e->e.func.ft) {
         case BUILTIN:
-            printf("func "); print_builtin(e->e.func.name.b); printf(" -> "); print_type(e->e.func.t); printf("\n");
+            printf("func "); print_builtin(e->e.func.name.b); printf(" -> ");
+            print_type(e->e.func.t); printf("\n");
             break;
         case TABLE:
-            printf("func %ld -> ", e->e.func.name.hash); print_type(e->e.func.t); printf("\n");
+            printf("func %ld -> ", e->e.func.name.hash);
+            print_type(e->e.func.t); printf("\n");
             break;
         }
         for(unsigned int ii = 0; ii < e->e.func.exprs; ii++) {
