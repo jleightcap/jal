@@ -5,6 +5,7 @@
 #include "eval.h"
 #include "parse.h"
 
+/*
 #define typeassert(expr, type) \
     assert(expr.expression.literal.t == type && "type mismatch!");
 
@@ -59,45 +60,5 @@ eval(const enum type t, const struct expr* e,
 
     return ans;
 }
+*/
 
-// print a nice looking indent
-#define indt(x) \
-    for(int ii = 0; ii < 2*x; ii++) \
-        printf(" "); \
-    printf("\033[1m\033[32m|-\033[m");
-
-void
-print_expr(const struct expr* e, int nest)
-{
-    indt(nest);
-    switch(e->exptype) {
-    case UNARY:
-        break;
-    case BINARY:
-        switch(e->expression.binary.op) {
-        case PLUS:
-            printf("'+'");
-            break;
-        case MINUS:
-            printf("'-'");
-            break;
-        case TIMES:
-            printf("'*'");
-            break;
-        case DIVIDE:
-            printf("'/'");
-            break;
-        default:
-            fprintf(stderr, "function calls are sad rn sorry\n"); exit(-1);
-        }
-        printf(" :binop\n");
-        print_expr(e->expression.binary.arg1, nest + 1);
-        print_expr(e->expression.binary.arg2, nest + 1);
-        break;
-    case LITERAL:
-        // TODO: switch on literal types
-        printf("%d", e->expression.literal.litval.integer);
-        printf(" :litint\n");
-        break;
-    }
-}

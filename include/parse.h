@@ -3,73 +3,43 @@
 
 #include "token.h"
 
+// maximum number of arguments to a function
+#define MAXARGS 10
+// maximum number of expressions in a function definition
+#define MAXEXPRS 50
+
 // ========================================================================= //
 //                                                                           //
 // PARSE DEFINITIONS                                                         //
 //                                                                           //
 // ========================================================================= //
 
-// types assigned to symbols
+// TYPES - assigned to symbols
 enum type {
     INT,
-    STRING
+    STRING,
+    VOID
 };
 
-// tokens that map direction to function
-enum intrinsic {
-    PLUS,
-    MINUS,
-    TIMES,
-    DIVIDE,
-
-    I_PRINT,
-    I_RETRN
+// FUNCTIONS ================================================================ //
+enum builtin {
+    F_ADD,
+    F_SUB,
+    F_MUL,
+    F_DIV,
+    F_MOD
 };
-
-enum exprtype {
-    // variable expression
-    UNARY,
-    BINARY,
-
-    // literal expression
-    LITERAL,
+enum ftype {
+    BUILTIN,
+    TABLE
 };
-
-// an expression
-struct expr {
-    enum exprtype exptype;
-    union {
-        // UNARY
-        struct {
-            enum intrinsic op;
-            struct expr* arg;
-        } unary;
-
-        // BINARY
-        struct {
-            enum intrinsic op;
-            struct expr* arg1;
-            struct expr* arg2;
-        } binary;
-
-        // LITERALS
-        struct {
-            enum type t;
-            union {
-                int integer;
-                char string[MAX_STRLEN];
-            } litval;
-        } literal;
-    } expression;
-};
-
-// FUNCTIONS
-
-#define MAXARGS 10
-#define MAXEXPRS 50
 struct func {
-    // return type
-    enum type type;
+    enum type t;
+    enum ftype ft;
+    union {
+        unsigned long hash;
+        enum builtin b;
+    } name;
     unsigned int exprs;
     struct expr* body[MAXEXPRS];
 };
@@ -77,14 +47,37 @@ struct funenv {
     struct func env[ENV_SIZE];
 };
 
-// VARIABLES
+// VARIABLES ================================================================ //
 struct var {
-    enum type type;
-    // note: a variable's expression body must be a literal type
-    struct expr body;
+    enum type t;
+    struct expr* body;
 };
 struct varenv {
     struct var env[ENV_SIZE];
+};
+
+// LITERALS ================================================================= //
+struct lit {
+    enum type t;
+    union {
+        int integer;
+        char string[MAX_STRLEN];
+    } litval;
+};
+
+// EXPERSSIONS ============================================================= //
+enum exprtypes {
+    FUNCTION,
+    LITERAL
+};
+struct expr {
+    enum exprtypes exprtype;
+    union {
+        // FUNCTIONS
+        struct func func;
+        // LITERALS
+        struct lit lit;
+    } e;
 };
 
 

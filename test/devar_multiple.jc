@@ -1,5 +1,5 @@
-(devar (x int) (* 8 5))
-(devar (y int) (- 101 99))
-(defun (main int)
+(devar (x `int) (* 8 5))
+(devar (y `int) (- 101 99))
+(defun (main `int)
     (ret (+ x y))
 )

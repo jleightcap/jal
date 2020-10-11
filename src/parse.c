@@ -6,6 +6,7 @@
 #include "eval.h"
 #include "parse.h"
 #include "token.h"
+#include "util.h"
 
 struct token currtok;
 
@@ -15,18 +16,18 @@ struct token currtok;
         exit(-1); \
     }
 
-// convert a token holding a type to the type associated with a given name
-enum type
-typetok_to_type(const enum toktype t)
+void
+func_free(struct func* f)
 {
-    switch(t) {
-    case TYPE_INT:
-        return INT;
-    case TYPE_STR:
-        return STRING;
-    default:
-        fprintf(stderr, "type not recognized!\n"); exit(-1);
+    for(unsigned int ii = 0; ii < f->exprs; ii++) {
+        expr_free(f->body[ii]);
     }
+}
+
+void
+lit_free(struct lit* v)
+{
+    return;
 }
 
 struct expr*
@@ -38,15 +39,12 @@ expr_init(void)
 void
 expr_free(struct expr* e)
 {
-    switch(e->exptype) {
-    case UNARY:
-        expr_free(e->expression.unary.arg);
-        break;
-    case BINARY:
-        expr_free(e->expression.binary.arg1);
-        expr_free(e->expression.binary.arg2);
+    switch(e->exprtype) {
+    case FUNCTION:
+        func_free(&e->e.func);
         break;
     case LITERAL:
+        lit_free(&e->e.lit);
         break;
     }
     free(e);
@@ -73,84 +71,90 @@ varenv_free(struct varenv* venv)
     return;
 }
 
-// parse a expression.
-// tokenizing begins with currtok at opening LPAREN
+// parse an expression from tokens, populating the expression e.
+// parsing begins with currtok at first token of expression
+// parsing ends with currtok at token after last token of expression
 void
 parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
     switch(currtok.type) {
-    // EXPRESSION
+    // LPAREN must be a function call
     case LPAREN:
+        e->exprtype = FUNCTION;
         currtok = scan(); // operator
         switch(currtok.type) {
-        // intrinsic binary ops
+        // resrved symbols
+        case DEVAR:
+            panic("Devar not at top level!");
+            break;
+        case DEFUN:
+            panic("Defun not at top level!");
+            break;
+        case RET:
+            e->e.func.t = VOID;
+            e->e.func.ft = TABLE;
+            e->e.func.name.hash = currtok.value.hash;
+            e->e.func.exprs = 1;
+            currtok = scan();
+            parse_expr(name, e->e.func.body[0] = expr_init(), fenv, venv);
+            break;
+        case PRINT:
+            e->e.func.t = VOID;
+            e->e.func.ft = TABLE;
+            e->e.func.name.hash = currtok.value.hash;
+            e->e.func.exprs = 1;
+            currtok = scan();
+            parse_expr(name, e->e.func.body[0] = expr_init(), fenv, venv);
+            break;
+
         case ADD:
-            e->expression.binary.op = PLUS;
-            goto intrinsic_binops;
+            e->e.func.name.b = F_ADD; goto builtin_binops;
         case SUB:
-            e->expression.binary.op = MINUS;
-            goto intrinsic_binops;
+            e->e.func.name.b = F_SUB; goto builtin_binops;
         case MUL:
-            e->expression.binary.op = TIMES;
-            goto intrinsic_binops;
+            e->e.func.name.b = F_MUL; goto builtin_binops;
         case DIV:
-            e->expression.binary.op = DIVIDE;
-            goto intrinsic_binops;
+            e->e.func.name.b = F_DIV; goto builtin_binops;
+        builtin_binops:
+            e->e.func.t = INT;
+            e->e.func.ft = BUILTIN;
+            e->e.func.exprs = 2;
+            currtok = scan(); // begin first argument
+            parse_expr(name, (e->e.func.body[0] = expr_init()), fenv, venv);
+            currtok = scan(); // begin second argument
+            parse_expr(name, (e->e.func.body[1] = expr_init()), fenv, venv);
+            break;
+
+        case SYM:
+            panic("TODO: variables!");
         default:
-            fprintf(stderr, "Unsupported binary op!\n"); exit(-1);
+            panic("unexpected function!");
         }
-        intrinsic_binops:
-            e->exptype = BINARY;
-            // initialize arg1, associated with same parse arguments
-            e->expression.binary.arg1 = expr_init();
-            currtok = scan();
-            parse_expr(name, e->expression.binary.arg1, fenv, venv);
-            // initialize arg2, associated with same parse arguments
-            e->expression.binary.arg2 = expr_init();
-            currtok = scan();
-            parse_expr(name, e->expression.binary.arg2, fenv, venv);
-
-            currtok = scan();
-            checktok(currtok, RPAREN, "intrinsic binary ops: too many arguments?");
-            return;
-
-    // ATOMS
-    case NUM:
-        e->exptype = LITERAL;
-        e->expression.literal.litval.integer = currtok.value.num;
-        return;
-    case STR:
-        e->exptype = LITERAL;
-        memcpy(e->expression.literal.litval.string, currtok.value.str, MAX_STRLEN);
-        return;
-
-    // VARIABLE
-    case SYM:
-        // lookup symbol in variable environment
-        e->exptype = LITERAL; // TODO: evaluate expression
-        e->expression.literal.litval.integer = venv->env[currtok.value.hash].body.expression.literal.litval.integer;
-        return;
-
-    // RESERVED FUNCTIONS
-    case PRINT:
-        e->exptype = UNARY;
-        e->expression.unary.op = I_PRINT;
         currtok = scan();
-        parse_expr(name, e, fenv, venv);
+        checktok(currtok, RPAREN, "expression end");
         break;
-    case RETRN:
-        e->exptype = UNARY;
-        e->expression.unary.op = I_RETRN;
-        currtok = scan();
-        parse_expr(name, e, fenv, venv);
+
+    // symbol not preceded by LPAREN must be a variable reference
+    case SYM:
+        e->exprtype = LITERAL;
+        panic("TODO: variable reference");
+        break;
+
+    // atoms
+    case A_INT:
+        e->exprtype = LITERAL;
+        e->e.lit.t = INT;
+        e->e.lit.litval.integer = currtok.value.num;
+        break;
+    case A_STR:
+        e->exprtype = LITERAL;
+        e->e.lit.t = STRING;
+        memcpy(e->e.lit.litval.string, currtok.value.str, MAX_STRLEN + 1);
         break;
 
     default:
-        fprintf(stderr, "%d unexpected expression!\n", currtok.type); exit(-1);
+        fprintf(stderr, "unexpected expression token!\n"); exit(-1);
     }
-
-    currtok = scan();
-    checktok(currtok, RPAREN, "expression end");
 }
 
 void
@@ -167,18 +171,7 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
     checktok(currtok, RPAREN, "variable signature end");
 
     // VARIABLE BODY PARSING
-    currtok = scan();
-    struct expr* e = expr_init();
-    parse_expr(name, e, fenv, venv);
-
-    struct expr ans = eval(t, e, fenv, venv);
-    expr_free(e);
-
-    venv->env[name].type = t;
-    venv->env[name].body = ans;
-
-    currtok = scan();
-    checktok(currtok, RPAREN, "variable defition end (match devar)");
+    // TODO!
 }
 
 // parse a function definition.
@@ -192,7 +185,9 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     currtok = scan(); // function name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // function return type
-    fenv->env[name].type = typetok_to_type(currtok.type);
+    fenv->env[name].t = typetok_to_type(currtok.type);
+    fenv->env[name].ft = TABLE;
+    fenv->env[name].name.hash = name;
     // TODO: this is where parsing arguments would occur!
     currtok = scan(); // )
     checktok(currtok, RPAREN, "function signature end");
@@ -200,16 +195,13 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     // FUNCTION BODY PARSING
     fenv->env[name].exprs = 0;
     for(currtok = scan(); currtok.type == LPAREN; currtok = scan()) {
-        printf("expression %d\n", fenv->env[name].exprs);
+        //printf("expression %d\n", fenv->env[name].exprs);
         struct expr* e = (fenv->env[name].body[fenv->env[name].exprs] = expr_init());
-        currtok = scan(); // function name
         parse_expr(name, e, fenv, venv);
         fenv->env[name].exprs += 1;
     }
     assert(fenv->env[name].exprs > 0 && "function must have a body!");
-    checktok(currtok, RPAREN, "function body end");
 
-    currtok = scan();
     checktok(currtok, RPAREN, "function declaration end (match defun)");
 }
 
@@ -217,7 +209,7 @@ void
 parse(struct funenv* fenv, struct varenv* venv)
 {
     for(currtok = scan(); currtok.type != END; currtok = scan()) {
-        checktok(currtok, LPAREN, "beginning expression");
+        checktok(currtok, LPAREN, "beginning top level expression");
         currtok = scan();
 
         // global definitions, can be:
@@ -235,7 +227,7 @@ parse(struct funenv* fenv, struct varenv* venv)
                 parse_devar(fenv, venv);
                 break;
             default:
-                fprintf(stderr, "unexpected token at expression initialization!\n");
+                fprintf(stderr, "unexpected token at top level expression!\n");
                 exit(-1);
         }
     }

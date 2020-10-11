@@ -18,21 +18,21 @@ enum toktype {
     // type declarations
     TYPE_INT,           // "int" integer type
     TYPE_STR,           // "string" type
+    TYPE_VOID,          // void
 
     // atoms
+    A_INT,              // number
+    A_STR,              // string
+
+    // symbol
     SYM,                // symbol
-    NUM,                // number
-    STR,                // string
 
     // reserved symbols
-    DEFUN,              // (defun [signature] [body])
-    DEVAR,              // (defar [var] [body])
-    MAIN,               // (main int) [args]
-    RETRN,              // (return [expr])
-    TRUE,               // "true"
-    FALSE,              // "false"
-    PRINT,              // "print"
-
+    MAIN,
+    DEFUN,
+    DEVAR,
+    RET,
+    PRINT,
 
     // binary operators
     ADD,                // (+ a b)

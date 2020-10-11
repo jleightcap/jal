@@ -46,6 +46,7 @@ emit_tmp(void)
 void
 emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* venv)
 {
+    /*
     char strbuf[100];
     switch(e->exptype) {
     case BINARY:
@@ -81,11 +82,13 @@ emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* 
     default:
         fprintf(stderr, "TODO!\n"); exit(-1);
     }
+    */
 }
 
 void
 emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv)
 {
+    /*
     out = f;
     unsigned long main = hashstr("main");
     memset(&reg_state.reg, 0, sizeof(struct riscv64_reg_state));
@@ -115,4 +118,5 @@ emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv)
     emit("\taddi\ta7, x0, 93\n");
     reg_state.reg[A7] = true;
     emit("\tecall\n");
+    */
 }

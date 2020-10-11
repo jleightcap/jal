@@ -33,3 +33,95 @@ hashstr(const char* str)
         hash = (hash * 67 + str[ii]) % ENV_SIZE;
     return hash;
 }
+
+void
+print_type(const enum type t)
+{
+    switch(t) {
+    case INT:
+        printf("int"); break;
+    case STRING:
+        printf("string"); break;
+    case VOID:
+        printf("void"); break;
+    }
+}
+
+void
+print_builtin(const enum builtin b)
+{
+    switch(b) {
+    case F_ADD: printf("'+'"); break;
+    case F_SUB: printf("'-'"); break;
+    case F_MUL: printf("'*'"); break;
+    case F_DIV: printf("'/'"); break;
+    case F_MOD: printf("mod"); break;
+    }
+    return;
+}
+
+// print a nice looking indent
+#define indt(x) \
+    for(unsigned int ii = 0; ii < 2*x; ii++) \
+        printf(" "); \
+    printf("\033[1m\033[32m|-\033[m");
+
+void
+print_func(const struct func* f, const unsigned int nest) {
+    indt(nest);
+    printf("func %ld -> ", f->name.hash); print_type(f->t); printf("\n");
+    for(unsigned int ii = 0; ii < f->exprs; ii++) {
+        print_expr(f->body[ii], nest + 1);
+    }
+}
+
+void
+print_expr(const struct expr* e, const unsigned int nest)
+{
+    indt(nest);
+    switch(e->exprtype) {
+    case FUNCTION:
+        switch(e->e.func.ft) {
+        case BUILTIN:
+            printf("func "); print_builtin(e->e.func.name.b); printf(" -> "); print_type(e->e.func.t); printf("\n");
+            break;
+        case TABLE:
+            printf("func %ld -> ", e->e.func.name.hash); print_type(e->e.func.t); printf("\n");
+            break;
+        }
+        for(unsigned int ii = 0; ii < e->e.func.exprs; ii++) {
+            print_expr(e->e.func.body[ii], nest + 1);
+        }
+        break;
+    case LITERAL:
+        switch(e->e.lit.t) {
+        case INT:
+            printf("%d -> integer literal\n", e->e.lit.litval.integer);
+            break;
+        case STRING:
+            printf("\"%s\" -> string literal\n", e->e.lit.litval.string);
+            break;
+        case VOID:
+            printf(":void literal\n");
+            break;
+        }
+        break;
+    }
+}
+
+// convert a token holding a type to the type associated with a given name
+enum type
+typetok_to_type(const enum toktype t)
+{
+    switch(t) {
+    case TYPE_INT:
+        return INT;
+    case TYPE_STR:
+        return STRING;
+    case TYPE_VOID:
+        return VOID;
+    default:
+        fprintf(stderr, "type %d not recognized!\n", t); exit(-1);
+    }
+}
+

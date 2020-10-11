@@ -1,4 +1,4 @@
-(devar (x int) (* 8 5))
-(defun (main int)
+(devar (x `int) (* 8 5))
+(defun (main `int)
     (ret (+ (- 101 99) x))
 )

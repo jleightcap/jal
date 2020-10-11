@@ -5,9 +5,9 @@
 #include "token.h"
 #include "util.h"
 
-static int fp = 0; // file position
-const char* file = NULL;
-int len = 0;
+static int fp = 0;              // file position
+static const char* file = NULL; // global FILE for tokenizing
+int len = 0;                    // global FILE length
 
 void
 setstream(const char stream[], int streamlen)
@@ -35,54 +35,70 @@ scan()
         return tok;
     }
 
-    // symbols
+    // SYMBOLS
     if(issymbol(file[fp])) {
         unsigned long hash = file[fp];
         // symbols can't start with number characters, but can include them
-        while(issymbol(file[fp]) || isnum(file[fp])) {
+        for(; issymbol(file[fp]) || isnum(file[fp]); fp++) {
             // TODO: play with prime numbers in hashing
             hash = (hash * 67 + file[fp]) % ENV_SIZE;
-            fp++;
         }
-        
-        // RESERVED KEYWORDS
-        // definitions
+        tok.value.hash = hash;
+        // RESERVED KEYWORD HASHES
+        if(hash == hashstr("main"))
+            tok.type = MAIN;
+        else
         if(hash == hashstr("defun"))
             tok.type = DEFUN;
-        else if(hash == hashstr("devar"))
+        else
+        if(hash == hashstr("devar"))
             tok.type = DEVAR;
-
-        // functions
-        else if(hash == hashstr("main"))
-            tok.type = MAIN;
-        else if(hash == hashstr("ret"))
-            tok.type = RETRN;
-        else if(hash == hashstr("print"))
+        else
+        if(hash == hashstr("ret"))
+            tok.type = RET;
+        else
+        if(hash == hashstr("print"))
             tok.type = PRINT;
-
-        // types
-        else if (hash == hashstr("int"))
-            tok.type = TYPE_INT;
-
-        // new symbol
-        else {
+        else
             tok.type = SYM;
-        }
-
-        tok.value.hash = hash;
         return tok;
     }
 
-    // integer literals
+    // TYPES
+    if(file[fp] == '`') {
+        fp++;
+        unsigned long hash = file[fp];
+        for(; issymbol(file[fp]); fp++) {
+            hash = (hash * 67 + file[fp]) % ENV_SIZE;
+        }
+        tok.value.hash = hash;
+        
+        // RESERVED TYPE HASHES
+        if(hash == hashstr("int"))
+            tok.type = TYPE_INT;
+        else
+        if(hash == hashstr("string"))
+            tok.type = TYPE_STR;
+        else
+        if(hash == hashstr("void"))
+            tok.type = TYPE_VOID;
+        else
+            fprintf(stderr, "invalid type declaration!\n");
+
+        return tok;
+    }
+
+    // LITERALS
+    // integer
     if(isnum(file[fp])) {
         int numlit = 0;
         while(isnum(file[fp]))
             numlit = (numlit * 10) + file[fp++] - '0';
-        tok.type = NUM;
+        tok.type = A_INT;
         tok.value.num = numlit;
         return tok;
     }
-    // string literals
+    // string
     if(file[fp] == '"') {
         unsigned int strpos = 0;
         fp++;
@@ -108,7 +124,7 @@ scan()
         }
         fp++;
         tok.value.str[strpos] = '\0';
-        tok.type = STR;
+        tok.type = A_STR;
         return tok;
     }
 

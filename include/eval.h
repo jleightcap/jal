@@ -11,7 +11,4 @@ struct expr
 eval(const enum type t, const struct expr* e,
      const struct funenv* fenv, const struct varenv* venv);
 
-void
-print_expr(const struct expr* e, int nest);
-
 #endif

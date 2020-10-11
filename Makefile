@@ -3,7 +3,7 @@ SRCS := $(wildcard src/*.c)
 OBJS := $(SRCS:.c=.o)
 
 INCLUDE = ./include
-CFLAGS := -DRISCV_64 -O0 -g -Wall -Wextra -pedantic -std=c99 -I$(INCLUDE) 
+CFLAGS := -DRISCV_64 -O0 -g -Wall -Wextra -Wno-unused-parameter -pedantic -std=c99 -I$(INCLUDE)
 VALGRIND = valgrind.out
 
 $(BIN): $(OBJS)
