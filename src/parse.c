@@ -10,6 +10,11 @@
 
 struct token currtok;
 
+void parse_devar(struct funenv* fenv, struct varenv* venv);
+void parse_defun(struct funenv* fenv, struct varenv* venv);
+void parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse(struct funenv* fenv, struct varenv* venv);
+
 #define checktok(tok, expect, str) \
     if(tok.type != expect) { \
         fprintf(stderr, "%s - didn't find expected token!\n", str); \
@@ -85,12 +90,17 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         switch(currtok.type) {
         // resrved symbols
         case DEVAR:
-            panic("Devar not at top level!");
+            //printf("inner devar\n");
+            e->e.func.t = VOID;
+            e->e.func.ft = TABLE;
+            e->e.func.name.hash = currtok.value.hash;
+            parse_devar(fenv, venv);
             break;
         case DEFUN:
             panic("Defun not at top level!");
             break;
         case RET:
+            //printf("ret\n");
             e->e.func.t = VOID;
             e->e.func.ft = TABLE;
             e->e.func.name.hash = currtok.value.hash;
@@ -99,6 +109,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
             parse_expr(name, e->e.func.body[0] = expr_init(), fenv, venv);
             break;
         case PRINT:
+            //printf("print\n");
             e->e.func.t = VOID;
             e->e.func.ft = TABLE;
             e->e.func.name.hash = currtok.value.hash;
@@ -123,6 +134,7 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
             parse_expr(name, (e->e.func.body[0] = expr_init()), fenv, venv);
             currtok = scan(); // begin second argument
             parse_expr(name, (e->e.func.body[1] = expr_init()), fenv, venv);
+            currtok = scan();
             break;
 
         case SYM:
@@ -130,8 +142,6 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         default:
             panic("unexpected function!");
         }
-        currtok = scan();
-        checktok(currtok, RPAREN, "expression end");
         break;
 
     // symbol not preceded by LPAREN must be a variable reference
@@ -142,7 +152,6 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
         e->e.lit.t = lit.t;
         switch(lit.t) {
         case INT:
-            printf("found intlit!\n");
             e->e.lit.litval.integer = lit.litval.integer;
             break;
         case STRING:
@@ -170,6 +179,9 @@ parse_expr(const unsigned long name, struct expr* e, struct funenv* fenv, struct
     }
 }
 
+// parse a `devar` declaration
+// parsing begins with currtok pointing to ( after 'devar'
+// parsing ends with currtok pointing to ) after expression body
 void
 parse_devar(struct funenv* fenv, struct varenv* venv)
 {
@@ -191,9 +203,6 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
     // Evaluate body to a literal type
     struct lit ans = eval(venv->env[name].t, e, fenv, venv);
     venv->env[name].body->e.lit = ans;
-
-    currtok = scan();
-    checktok(currtok, RPAREN, "function declaration end (match defun)");
 }
 
 // parse a function definition.
@@ -217,14 +226,17 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     // FUNCTION BODY PARSING
     fenv->env[name].exprs = 0;
     for(currtok = scan(); currtok.type == LPAREN; currtok = scan()) {
-        //printf("expression %d\n", fenv->env[name].exprs);
-        struct expr* e = (fenv->env[name].body[fenv->env[name].exprs] = expr_init());
+        unsigned int ii = fenv->env[name].exprs;
+        fenv->env[name].body[ii] = expr_init();
+        struct expr* e = fenv->env[name].body[ii];
         parse_expr(name, e, fenv, venv);
+        currtok = scan();
         fenv->env[name].exprs += 1;
     }
+    //printf("%d exprs: at end of defun: %d\n", fenv->env[name].exprs,  currtok.type);
     assert(fenv->env[name].exprs > 0 && "function must have a body!");
 
-    checktok(currtok, RPAREN, "function declaration end (match defun)");
+    //checktok(currtok, RPAREN, "function declaration end (match defun)");
 }
 
 void
@@ -242,11 +254,14 @@ parse(struct funenv* fenv, struct varenv* venv)
             case DEFUN:
                 //printf("defun\n");
                 parse_defun(fenv, venv);
+                checktok(currtok, RPAREN, "top level DEFUN end");
                 break;
             // variable definition
             case DEVAR:
                 //printf("devar\n");
                 parse_devar(fenv, venv);
+                currtok = scan();
+                checktok(currtok, RPAREN, "top level DEVAR end");
                 break;
             default:
                 fprintf(stderr, "unexpected token at top level expression!\n");

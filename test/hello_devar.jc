@@ -1,5 +1,7 @@
-(devar (x `string) "hello world!")
+(devar (x `string) "hello")
+(devar (y `string) "world!")
 (defun (main `int)
     (print x)
+    (print y)
     (ret 0)
 )

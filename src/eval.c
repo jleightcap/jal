@@ -22,6 +22,9 @@ eval(const enum type t, const struct expr* e,
         case FUNCTION:
             switch(e->e.func.ft) {
             case BUILTIN:
+                // TODO: this breaks if there any any non-binary builtin functions
+                // would have to change, for example, if ADD supported arbitrary
+                // arguments (which is not unreasonale)
                 args[0] = eval(t, e->e.func.body[0], fenv, venv);
                 args[1] = eval(t, e->e.func.body[1], fenv, venv);
                 switch(e->e.func.name.b) {
