@@ -1,0 +1,11 @@
+(devar (x `int) 2)
+(defun (main `int)
+    (print
+        # the quinary operator returns the type of its arguments
+        (? (< x 3)
+            "lower!"
+            "higher!"
+        )
+    )
+    (ret 0)
+)

@@ -125,6 +125,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             break;
         case QUINARY:
             printf("quinary\n");
+            //e->e.func.t = VOID;
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_QUI;
             // TODO: the consequence branch should be optional
@@ -132,16 +133,14 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             struct expr* cond = (e->e.func.body[0] = expr_init());
             struct expr* resl = (e->e.func.body[1] = expr_init());
             struct expr* cons = (e->e.func.body[2] = expr_init());
-
             currtok = scan();
             checktok(currtok, LPAREN, "quinary cond beginning");
             parse_quinary(cond, resl, cons, fenv, venv);
             checktok(currtok, RPAREN, "quinary cons end");
-
             enum type t_resl = (resl->exprtype == FUNCTION) ? resl->e.func.t : resl->e.lit.t;
             enum type t_cons = (cons->exprtype == FUNCTION) ? cons->e.func.t : cons->e.lit.t;
             assert(t_resl  == t_cons &&  "result and consequence must have same type!");
-            e->e.func.t = t_resl; // quinary return type of each branch
+            e->e.func.t = t_resl;
             break;
 
         case ADD: e->e.func.name.b = F_ADD; goto builtin_binops;
