@@ -249,11 +249,16 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
 
     // VARIABLE BODY PARSING
     currtok = scan();
-    struct expr* e = (venv->env[name].body = expr_init());
-    parse_expr(e, fenv, venv);
-
+    venv->env[name].body = expr_init();
+    parse_expr(venv->env[name].body, fenv, venv);
+    
     // Evaluate body to a literal type
-    struct lit ans = eval(venv->env[name].t, e, fenv, venv);
+    struct lit ans = eval(venv->env[name].t, venv->env[name].body, fenv, venv);
+
+    // free the evalulated variable expression body, replace with literal
+    expr_free(venv->env[name].body);
+    venv->env[name].body = expr_init();
+    venv->env[name].body->exprtype = LITERAL;
     venv->env[name].body->e.lit = ans;
 
     currtok = scan();

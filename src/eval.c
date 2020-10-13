@@ -13,10 +13,10 @@ eval(const enum type t, const struct expr* e,
     struct lit lit;
     struct lit args[MAXARGS];
     lit.t = t;
-    for(unsigned int ii = 0; ii < e->e.func.exprs; ii++)
-        args[ii] = eval(t, e->e.func.body[ii], fenv, venv);
     switch(e->exprtype) {
     case FUNCTION:
+        for(unsigned int ii = 0; ii < e->e.func.exprs; ii++)
+            args[ii] = eval(t, e->e.func.body[ii], fenv, venv);
         switch(e->e.func.ft) {
         case BUILTIN:
             switch(e->e.func.name.b) {
