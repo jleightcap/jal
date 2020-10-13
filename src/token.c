@@ -37,27 +37,29 @@ scan()
 
     // SYMBOLS
     if(issymbol(file[fp])) {
+        unsigned int symlen = 0;
         unsigned long hash = file[fp];
         // symbols can't start with number characters, but can include them
         for(; issymbol(file[fp]) || isnum(file[fp]); fp++) {
             // TODO: play with prime numbers in hashing
             hash = (hash * 67 + file[fp]) % ENV_SIZE;
+            symlen++;
         }
         tok.value.hash = hash;
         // RESERVED KEYWORD HASHES
-        if(hash == hashstr("main"))
+        if(hash == hashstr("main") && symlen == 4)
             tok.type = MAIN;
         else
-        if(hash == hashstr("defun"))
+        if(hash == hashstr("defun") && symlen == 5)
             tok.type = DEFUN;
         else
-        if(hash == hashstr("devar"))
+        if(hash == hashstr("devar") && symlen == 5)
             tok.type = DEVAR;
         else
-        if(hash == hashstr("ret"))
+        if(hash == hashstr("ret") && symlen == 3)
             tok.type = RET;
         else
-        if(hash == hashstr("print"))
+        if(hash == hashstr("print") && symlen == 5)
             tok.type = PRINT;
         else
             tok.type = SYM;
@@ -137,24 +139,25 @@ scan()
 
     // OVERLAPING CHARACTER TOKENS
     switch(file[fp]) {
-    case '<': switch(file[++fp]) {
-              case '<': tok.type = LSL; return tok;
-              case '=': tok.type = LE;  return tok;
-              default:  tok.type = LT;  return tok;
-              } break;
+    case '<': fp++;
+              switch(file[fp]) {
+              case '<': tok.type = LSL; break;
+              case '=': tok.type = LE;  break;
+              default:  tok.type = LT;  break;
+              } fp++; return tok;
     case '>': switch(file[++fp]) {
-              case '>': tok.type = LSR; return tok;
-              case '=': tok.type = GE;  return tok;
-              default:  tok.type = GT;  return tok;
-              } break;
+              case '>': tok.type = LSR; break;
+              case '=': tok.type = GE;  break;
+              default:  tok.type = GT;  break;
+              } fp++; return tok;
     case '=': switch(file[++fp]) {
-              case '=': tok.type = EQ;     return tok;
-              default:  tok.type = ASSIGN; return tok;
-              } break;
+              case '=': tok.type = EQ;     break;
+              default:  tok.type = ASSIGN; break;
+              } fp++; return tok;
     case '!': switch(file[++fp]) {
-              case '=': tok.type = NE;  return tok;
-              default:  tok.type = NOT; return tok;
-              }
+              case '=': tok.type = NE;  break;
+              default:  tok.type = NOT; break;
+              } fp++; return tok;
     default: break;
     }
 

@@ -29,9 +29,14 @@ enum builtin {
     F_MUL,
     F_DIV,
     F_MOD,
+    
+    // binary operators
+    F_NOT,
+    F_AND,
+    F_OR,
     F_LSL,
     F_LSR,
-    
+
     // comparators
     F_EQ,
     F_NE,
@@ -39,8 +44,14 @@ enum builtin {
     F_LT,
     F_GE,
     F_LE,
+    F_QUI,
 
-    F_QUI
+    // hashed symbols
+    F_MAIN,
+    F_DEFUN,
+    F_DEVAR,
+    F_RET,
+    F_PRINT
 };
 enum ftype {
     BUILTIN,

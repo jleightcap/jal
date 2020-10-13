@@ -46,6 +46,7 @@ enum toktype {
     NOT,                // (! a)
     AND,                // (& a b)
     OR,                 // (| a b)
+    QUINARY,            // (? cond resl cons)
 
     // binary comparators
     EQ,                 // (== a b)
@@ -54,9 +55,6 @@ enum toktype {
     LT,                 // (<  a b)
     GE,                 // (>= a b)
     LE,                 // (<= a b)
-
-    // conditionals
-    QUINARY,            // (? cond conseq else)
 };
 
 #define MAX_STRLEN 100
