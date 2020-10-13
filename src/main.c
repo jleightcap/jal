@@ -60,4 +60,5 @@ main(int ac, char** av) {
     funenv_free(&fenv);
     varenv_free(&venv);
 
+    return 0;
 }
