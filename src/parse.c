@@ -75,7 +75,11 @@ funenv_free(struct funenv* fenv)
 void
 varenv_free(struct varenv* venv)
 {
-    return;
+    for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
+        if(venv->env[ii].body != NULL) {
+            expr_free(venv->env[ii].body);
+        }
+    }
 }
 
 // parse an expression from tokens, populating the expression e.
