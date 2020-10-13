@@ -105,7 +105,6 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             break;
         case DEFUN:
             panic("defun not at top level!");
-            break;
         case RET:
             //printf("ret\n");
             e->e.func.t = VOID;
@@ -114,8 +113,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             e->e.func.exprs = 1;
             currtok = scan();
             parse_expr(e->e.func.body[0] = expr_init(), fenv, venv);
-            currtok = scan();
-            checktok(currtok, RPAREN, "return end");
+            checktok((currtok = scan()), RPAREN, "return end");
             break;
         case PRINT:
             //printf("print\n");
@@ -137,8 +135,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             struct expr* resl = (e->e.func.body[1] = expr_init());
             struct expr* cons = (e->e.func.body[2] = expr_init());
 
-            currtok = scan();
-            checktok(currtok, LPAREN, "quinary cond beginning");
+            checktok((currtok = scan()), LPAREN, "quinary cond beginning");
             parse_quinary(cond, resl, cons, fenv, venv);
             checktok(currtok, RPAREN, "quinary cons end");
 
@@ -227,8 +224,7 @@ parse_quinary(struct expr* cond, struct expr* resl, struct expr* cons,
     parse_expr(resl, fenv, venv);
     currtok = scan();
     parse_expr(cons, fenv, venv);
-    currtok = scan();
-    checktok(currtok, RPAREN, "quinary cons expression end");
+    checktok((currtok = scan()), RPAREN, "quinary cons expression end");
 }
 
 // parse a `devar` declaration
@@ -238,14 +234,12 @@ void
 parse_devar(struct funenv* fenv, struct varenv* venv)
 {
     // VARIABLE SIGNATURE PARSING
-    currtok = scan(); // (
-    checktok(currtok, LPAREN, "variable signature begin");
+    checktok((currtok = scan()), LPAREN, "variable signature begin");
     currtok = scan(); // variable name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // variable type
     venv->env[name].t = typetok_to_type(currtok.type);
-    currtok = scan(); // )
-    checktok(currtok, RPAREN, "variable signature end");
+    checktok((currtok = scan()), RPAREN, "variable signature end");
 
     // VARIABLE BODY PARSING
     currtok = scan();
@@ -261,8 +255,7 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
     venv->env[name].body->exprtype = LITERAL;
     venv->env[name].body->e.lit = ans;
 
-    currtok = scan();
-    checktok(currtok, RPAREN, "variable body end");
+    checktok((currtok = scan()), RPAREN, "variable body end");
 }
 
 // parse a function definition.
@@ -271,8 +264,7 @@ void
 parse_defun(struct funenv* fenv, struct varenv* venv)
 {
     // FUNCTION SIGNATURE PARSING
-    currtok = scan(); // (
-    checktok(currtok, LPAREN, "function signature begin");
+    checktok((currtok = scan()), LPAREN, "function signature begin");
     currtok = scan(); // function name
     const unsigned long name = currtok.value.hash;
     currtok = scan(); // function return type
@@ -280,8 +272,7 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
     fenv->env[name].ft = TABLE;
     fenv->env[name].name.hash = name;
     // TODO: this is where parsing arguments would occur!
-    currtok = scan(); // )
-    checktok(currtok, RPAREN, "function signature end");
+    checktok((currtok = scan()), RPAREN, "function signature end");
 
     // FUNCTION BODY PARSING
     fenv->env[name].exprs = 0;

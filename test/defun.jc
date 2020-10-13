@@ -1,4 +1,4 @@
-(defun (f `int)
+(defun (f `int (x `int) (y `int))
     (ret (+ x y))
 )
 (defun (main `int)

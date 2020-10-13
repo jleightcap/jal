@@ -75,6 +75,7 @@ struct funenv {
 struct var {
     enum type t;
     struct expr* body;
+    unsigned long hash;
 };
 struct varenv {
     struct var env[ENV_SIZE];
