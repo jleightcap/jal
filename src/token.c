@@ -89,7 +89,7 @@ scan()
     }
 
     // LITERALS
-    // integer
+    // integer literal
     if(isnum(file[fp])) {
         int numlit = 0;
         while(isnum(file[fp]))
@@ -98,26 +98,21 @@ scan()
         tok.value.num = numlit;
         return tok;
     }
-    // string
+    // string literal
     if(file[fp] == '"') {
         unsigned int strpos = 0;
         fp++;
         while(file[fp] != '"') {
             switch(file[fp]) {
-            // escape characters
             case '\\':
                 switch(file[++fp]) {
-                case 'n':
-                    tok.value.str[strpos] = '\n';
-                    break;
-                default:
-                    fprintf(stderr, "unexpected escape sequence!\n"); exit(-1);
+                case 'n':  tok.value.str[strpos] = '\n'; break;
+                case 't':  tok.value.str[strpos] = '\t'; break;
+                case '\\': tok.value.str[strpos] = '\\'; break;
+                default: fprintf(stderr, "unexpected escape sequence!\n"); exit(-1);
                 }
                 break;
-            // non-escape characters
-            default:
-                tok.value.str[strpos] = file[fp];
-                break;
+            default: tok.value.str[strpos] = file[fp]; break;
             }
             assert(strpos < MAX_STRLEN && "exceeded string buffer: increase MAX_STRLEN!");
             strpos++; fp++;
@@ -128,45 +123,42 @@ scan()
         return tok;
     }
 
-    // lparen
-    if(file[fp] == '(') {
-        fp++;
-        tok.type = LPAREN;
-        return tok;
-    }
-    // rparen
-    if(file[fp] == ')') {
-        fp++;
-        tok.type = RPAREN;
-        return tok;
-    }
-    // +
-    if(file[fp] == '+') {
-        fp++;
-        tok.type = ADD;
-        return tok;
-    }
-    // -
-    if(file[fp] == '-') {
-        fp++;
-        tok.type = SUB;
-        return tok;
-    }
-    // *
-    if(file[fp] == '*') {
-        fp++;
-        tok.type = MUL;
-        return tok;
-    }
-    // /
-    if(file[fp] == '/') {
-        fp++;
-        tok.type = DIV;
-        return tok;
+    // NON-OVERLAPPING SINGLE CHARACTER TOKENS
+    switch(file[fp]) {
+    case '(': fp++; tok.type = LPAREN;  return tok;
+    case ')': fp++; tok.type = RPAREN;  return tok;
+    case '+': fp++; tok.type = ADD;     return tok;
+    case '-': fp++; tok.type = SUB;     return tok;
+    case '*': fp++; tok.type = MUL;     return tok;
+    case '/': fp++; tok.type = DIV;     return tok;
+    case '?': fp++; tok.type = QUINARY; return tok;
+    default: break;
     }
 
-    else {
-        fprintf(stderr, "token parsing error!\n");
-        exit(-1);
+    // OVERLAPING CHARACTER TOKENS
+    switch(file[fp]) {
+    case '<': switch(file[++fp]) {
+              case '<': tok.type = LSL; return tok;
+              case '=': tok.type = LE;  return tok;
+              default:  tok.type = LT;  return tok;
+              } break;
+    case '>': switch(file[++fp]) {
+              case '>': tok.type = LSR; return tok;
+              case '=': tok.type = GE;  return tok;
+              default:  tok.type = GT;  return tok;
+              } break;
+    case '=': switch(file[++fp]) {
+              case '=': tok.type = EQ;     return tok;
+              default:  tok.type = ASSIGN; return tok;
+              } break;
+    case '!': switch(file[++fp]) {
+              case '=': tok.type = NE;  return tok;
+              default:  tok.type = NOT; return tok;
+              }
+    default: break;
     }
+
+    // No matches! Tokenizing failed.
+    fprintf(stderr, "token parsing error!\n");
+    exit(-1);
 }

@@ -2,10 +2,9 @@ BIN     ?= jal
 SRCS    ?= $(wildcard src/*.c)
 OBJS    ?= $(SRCS:.c=.o)
 INCLUDE ?= ./include
-CFLAGS  ?= -O0 -g \
-	   -Wall -Wextra -Wno-unused-parameter -pedantic \
-	   -std=c99 \
-	   -I$(INCLUDE) -DRISCV-64
+CFLAGS  ?= -DRISCV_64 \
+	   -O0 -g -Wall -Wextra -Wno-unused-parameter -pedantic \
+	   -std=c99 -I$(INCLUDE)
 
 VFLAGS ?= --leak-check=full \
 	  --show-leak-kinds=all \

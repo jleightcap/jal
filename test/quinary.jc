@@ -1,0 +1,8 @@
+(devar (x `int) 2)
+(defun (main `int)
+    (? (< x 2)
+        (print "correct!")
+        (print "too high!")
+    )
+    (ret 0)
+)

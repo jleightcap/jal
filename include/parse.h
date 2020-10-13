@@ -23,11 +23,24 @@ enum type {
 
 // FUNCTIONS ================================================================ //
 enum builtin {
+    // arithmetic
     F_ADD,
     F_SUB,
     F_MUL,
     F_DIV,
-    F_MOD
+    F_MOD,
+    F_LSL,
+    F_LSR,
+    
+    // comparators
+    F_EQ,
+    F_NE,
+    F_GT,
+    F_LT,
+    F_GE,
+    F_LE,
+
+    F_QUI
 };
 enum ftype {
     BUILTIN,

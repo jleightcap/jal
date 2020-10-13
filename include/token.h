@@ -34,12 +34,18 @@ enum toktype {
     RET,
     PRINT,
 
-    // binary operators
+    // operators
     ADD,                // (+ a b)
     SUB,                // (- a b)
     MUL,                // (* a b)
     DIV,                // (/ a b)
     MOD,                // (% a b)
+    LSL,                // (<< a b)
+    LSR,                // (>> a b)
+    ASSIGN,             // (= a b)
+    NOT,                // (! a)
+    AND,                // (& a b)
+    OR,                 // (| a b)
 
     // binary comparators
     EQ,                 // (== a b)
@@ -47,7 +53,10 @@ enum toktype {
     GT,                 // (>  a b)
     LT,                 // (<  a b)
     GE,                 // (>= a b)
-    LE                  // (<= a b)
+    LE,                 // (<= a b)
+
+    // conditionals
+    QUINARY,            // (? cond conseq else)
 };
 
 #define MAX_STRLEN 100

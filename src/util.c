@@ -56,6 +56,15 @@ print_builtin(const enum builtin b)
     case F_MUL: printf("'*'"); break;
     case F_DIV: printf("'/'"); break;
     case F_MOD: printf("mod"); break;
+    case F_LSL: printf("<<");  break;
+    case F_LSR: printf(">>");  break;
+    case F_EQ:  printf("==");  break;
+    case F_NE:  printf("!=");  break;
+    case F_GT:  printf(">");   break;
+    case F_LT:  printf("<");   break;
+    case F_GE:  printf(">=");  break;
+    case F_LE:  printf("<=");  break;
+    case F_QUI: printf("?");   break;
     }
     return;
 }
@@ -106,7 +115,7 @@ print_expr(const struct expr* e, const unsigned int nest)
             printf("\"%s\" -> string literal\n", e->e.lit.litval.string);
             break;
         case VOID:
-            printf(":void literal\n");
+            printf("void literal\n");
             break;
         }
         break;
