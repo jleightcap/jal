@@ -1,10 +1,19 @@
-BIN  := jal
-SRCS := $(wildcard src/*.c)
-OBJS := $(SRCS:.c=.o)
+BIN     ?= jal
+SRCS    ?= $(wildcard src/*.c)
+OBJS    ?= $(SRCS:.c=.o)
+INCLUDE ?= ./include
+CFLAGS  ?= -O0 -g \
+	   -Wall -Wextra -Wno-unused-parameter -pedantic \
+	   -std=c99 \
+	   -I$(INCLUDE) -DRISCV-64
 
-INCLUDE = ./include
-CFLAGS := -DRISCV_64 -O0 -g -Wall -Wextra -Wno-unused-parameter -pedantic -std=c99 -I$(INCLUDE)
-VALGRIND = valgrind.out
+VFLAGS ?= --leak-check=full \
+	  --show-leak-kinds=all \
+	  --track-origins=yes \
+	  --error-exitcode=1 \
+	  --trace-children=yes \
+	  --show-reachable=no
+VALGRIND ?= valgrind.out
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $(OBJS)
@@ -20,7 +29,7 @@ $(BIN): $(OBJS)
 
 # TEST=[testfile] make memtest
 memtest: $(BIN)
-	valgrind -q --track-origins=yes --leak-check=full --log-file=$(VALGRIND) ./$(BIN) $(TEST) /dev/null
+	valgrind -q $(VFLAGS) --log-file=$(VALGRIND) ./$(BIN) $(TEST) /dev/null
 	cat -n $(VALGRIND)
 
 clean:
