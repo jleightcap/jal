@@ -31,7 +31,7 @@ $(BIN): $(OBJS)
 
 # TEST=[testfile] make memtest
 memtest: $(BIN)
-	valgrind -q $(VFLAGS)  ./$(BIN) $(TEST) /dev/null
+	valgrind -q $(VFLAGS) ./$(BIN) $(TEST) /dev/null
 	cat -n $(VALGRIND)
 
 clean:

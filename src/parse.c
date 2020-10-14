@@ -37,6 +37,12 @@ lit_free(struct lit* v)
     return;
 }
 
+void
+var_free(struct var* v)
+{
+    free(v->body);
+}
+
 struct expr*
 expr_init(void)
 {
@@ -53,6 +59,9 @@ expr_free(struct expr* e)
     case LITERAL:
         lit_free(&e->e.lit);
         break;
+    case VARIABLE:
+        var_free(&e->e.var);
+        break;
     }
     free(e);
 }
@@ -64,10 +73,8 @@ funenv_free(struct funenv* fenv)
     for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
         // found a function; has expressions
         if(fenv->env[ii].exprs > 0) {
-            // free all expressions associated with function
-            for(unsigned int jj = 0; jj < fenv->env[ii].exprs; jj++) {
-                expr_free(fenv->env[ii].body[jj]);
-            }
+            func_free(&fenv->env[ii]);
+            varenv_free(fenv->env[ii].venv);
             free(fenv->env[ii].venv);
         }
     }
@@ -89,7 +96,7 @@ varenv_free(struct varenv* venv)
 void
 parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    //printf("currtok type %d\n", currtok.type);
+    printf("currtok type %d\n", currtok.type);
     switch(currtok.type) {
     // LPAREN must be a function call
     case LPAREN:
@@ -98,7 +105,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         switch(currtok.type) {
         // resrved symbols
         case DEVAR:
-            //printf("inner devar\n");
+            printf("inner devar\n");
             e->e.func.t = VOID;
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_DEVAR;
@@ -107,7 +114,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case DEFUN:
             panic("defun not at top level!");
         case RET:
-            //printf("ret\n");
+            printf("ret\n");
             e->e.func.t = VOID;
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_RET;
@@ -119,7 +126,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             checktok((currtok = scan()), RPAREN, "return end");
             break;
         case PRINT:
-            //printf("print\n");
+            printf("print\n");
             e->e.func.t = VOID;
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_PRINT;
@@ -130,7 +137,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             currtok = scan();
             break;
         case QUINARY:
-            //printf("quinary\n");
+            printf("quinary\n");
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_QUI;
             // TODO: the consequence branch should be optional
@@ -175,14 +182,17 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
 
         // symbol preceded by LPAREN must be a function reference
         case SYM:
+            printf("func call\n");
             e->e.func = fenv->env[currtok.value.hash];
             currtok = scan();
-            //printf("args = %d\n", e->e.func.args);
+            printf("args = %d\n", e->e.func.argnum);
             for(unsigned int ii = 0; ii < e->e.func.argnum; ii++) {
+                assert(currtok.type != RPAREN && "expected another argument!");
                 parse_expr((e->e.func.body[ii] = expr_init()), fenv, venv);
                 currtok = scan();
                 //printf("parsed expr %d\n", ii);
             }
+            checktok(currtok, RPAREN, "function arguments end");
             //printf("sym end %d\n", currtok.type);
             break;
         default:
@@ -326,13 +336,13 @@ parse(struct funenv* fenv, struct varenv* venv)
         switch(currtok.type) {
         // function definition
         case DEFUN:
-            //printf("defun\n");
+            printf("defun\n");
             parse_defun(fenv, venv);
             checktok(currtok, RPAREN, "top level DEFUN end");
             break;
         // variable definition
         case DEVAR:
-            //printf("devar\n");
+            printf("devar\n");
             parse_devar(fenv, venv);
             checktok(currtok, RPAREN, "top level DEVAR end");
             break;

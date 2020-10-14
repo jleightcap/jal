@@ -1,7 +1,7 @@
-(defun (f `int (x `int) (y `int))
-    (ret (+ x y))
+(defun (f `int (x `int) (y `int) (z `int))
+    (ret (+ x 4))
 )
 
 (defun (main `int)
-    (ret (+ 2 (f 38 2)))
+    (ret (f 2 2 2))
 )

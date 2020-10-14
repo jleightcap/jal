@@ -119,6 +119,8 @@ eval(const enum type t, const struct expr* e,
     case LITERAL:
         lit = e->e.lit;
         break;
+    case VARIABLE:
+        panic("TODO: variables in eval!");
     }
     return lit;
 }

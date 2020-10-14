@@ -107,7 +107,7 @@ print_defun(const struct func* f)
         if(f->name.hash == hashstr("main"))
             printf("defun main: ");
         else
-            printf("defun %ld: ", f->name.hash);
+            printf("defun [%ld]: ", f->name.hash);
         break;
     }
     // print function signature
@@ -135,7 +135,7 @@ print_func(const struct func* f, const unsigned int nest) {
         if(f->name.hash == hashstr("main")) // only mandatory hash
             printf("func main: ");
         else
-            printf("func %ld: ", f->name.hash);
+            printf("func [%ld]: ", f->name.hash);
         break;
     }
     // print function signature
