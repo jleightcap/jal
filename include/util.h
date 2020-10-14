@@ -29,6 +29,12 @@ void
 print_builtin(const enum builtin b);
 
 void
+print_fenv(const struct funenv* fenv);
+
+void
+print_defun(const struct func* f);
+
+void
 print_func(const struct func* f, const unsigned int nest);
 
 void

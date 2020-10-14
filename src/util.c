@@ -79,16 +79,73 @@ print_builtin(const enum builtin b)
 
 // print a nice looking indent
 #define indt(x) \
-    for(unsigned int ii = 0; ii < 2*x; ii++) \
+    for(unsigned int ii = 0; ii < x; ii++) \
         printf(" "); \
     printf("\033[1m\033[32m|-\033[m");
 
+void
+print_fenv(const struct funenv* f) {
+    // iterate over whole function environment, most is probably empty
+    for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
+        // found a function; has expressions
+        if(f->env[ii].exprs > 0) {
+            print_defun(&f->env[ii]);
+        }
+    }
+}
+
 // print a top-level defun, calls print_expr on each body expression
 void
-print_func(const struct func* f, const unsigned int nest) {
-    indt(nest);
-    printf("defun %ld -> ", f->name.hash); print_type(f->t); printf("\n");
+print_defun(const struct func* f)
+{
+    indt(0); // -Wno-type-limits
+    switch(f->ft) {
+    case BUILTIN: 
+        printf("defun "); print_builtin(f->name.b); printf(": ");
+        break;
+    case TABLE:
+        if(f->name.hash == hashstr("main"))
+            printf("defun main: ");
+        else
+            printf("defun %ld: ", f->name.hash);
+        break;
+    }
+    // print function signature
+    for(unsigned int ii = 0; ii < f->argnum; ii++) {
+        switch(f->ft) {
+        case BUILTIN: print_type(f->args.argt[ii]); break;
+        case TABLE:   printf("var[%ld]", f->args.arghash[ii]); break;
+        } printf(" ");
+    } printf("-> "); print_type(f->t); printf("\n");
     for(unsigned int ii = 0; ii < f->exprs; ii++) {
+        print_expr(f->body[ii], 2);
+    }
+}
+
+// print a function call, calls print_expr on each body expression
+void
+print_func(const struct func* f, const unsigned int nest) {
+    switch(f->ft) {
+    case BUILTIN:
+        printf("func "); print_builtin(f->name.b); printf(": ");
+        break;
+    case TABLE:
+        if(f->name.hash == hashstr("main")) // only mandatory hash
+            printf("func main: ");
+        else
+            printf("func %ld: ", f->name.hash);
+        break;
+    }
+    // print function signature
+    for(unsigned int ii = 0; ii < f->argnum; ii++) {
+        switch(f->ft) {
+        case BUILTIN: print_type(f->args.argt[ii]); break;
+        case TABLE:   print_type(f->venv->env[f->args.arghash[ii]].t); break;
+        } printf(" ");
+    } printf("-> "); print_type(f->t); printf("\n");
+    // print function body
+    for(unsigned int ii = 0; ii < f->argnum; ii++) {
+        //printf("expr %d\n", ii);
         print_expr(f->body[ii], nest + 1);
     }
 }
@@ -100,32 +157,26 @@ print_expr(const struct expr* e, const unsigned int nest)
     indt(nest);
     switch(e->exprtype) {
     case FUNCTION:
-        switch(e->e.func.ft) {
-        case BUILTIN:
-            printf("func "); print_builtin(e->e.func.name.b); printf(" -> ");
-            print_type(e->e.func.t); printf("\n");
-            break;
-        case TABLE:
-            printf("func %ld -> ", e->e.func.name.hash);
-            print_type(e->e.func.t); printf("\n");
-            break;
-        }
-        for(unsigned int ii = 0; ii < e->e.func.exprs; ii++) {
-            print_expr(e->e.func.body[ii], nest + 1);
-        }
+        //printf("function\n");
+        print_func(&e->e.func, nest + 1);
         break;
     case LITERAL:
+        //printf("literal\n");
         switch(e->e.lit.t) {
         case INT:
-            printf("%d -> integer literal\n", e->e.lit.litval.integer);
+            printf("%d :integer literal\n", e->e.lit.litval.integer);
             break;
         case STRING:
-            printf("\"%s\" -> string literal\n", e->e.lit.litval.string);
+            printf("\"%s\" :string literal\n", e->e.lit.litval.string);
             break;
         case VOID:
             printf("void literal\n");
             break;
         }
+        break;
+    case VARIABLE:
+        //printf("variable\n");
+        printf("[%ld] :variable hash\n", e->e.var.hash);
         break;
     }
 }

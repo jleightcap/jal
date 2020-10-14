@@ -21,6 +21,16 @@ enum type {
     VOID
 };
 
+// VARIABLES ================================================================ //
+struct var {
+    enum type t;
+    unsigned long hash;
+    struct expr* body;
+};
+struct varenv {
+    struct var env[ENV_SIZE];
+};
+
 // FUNCTIONS ================================================================ //
 enum builtin {
     // arithmetic
@@ -58,27 +68,32 @@ enum ftype {
     TABLE
 };
 struct func {
+    // metadata
     enum type t;
     enum ftype ft;
     union {
         unsigned long hash;
         enum builtin b;
-    } name;
+    } name; // tagged by ft
+    
+    // args
+    unsigned int argnum;
+    union {
+        // arguments are variables, use hash to look up in venv
+        unsigned long arghash[MAXARGS];
+        // arguments are just a type, for builtin functions
+        enum type argt[MAXARGS];
+    } args; // taged by ft
+    
+    // body
     unsigned int exprs;
     struct expr* body[MAXEXPRS];
+
+    // environment
+    struct varenv* venv;
 };
 struct funenv {
     struct func env[ENV_SIZE];
-};
-
-// VARIABLES ================================================================ //
-struct var {
-    enum type t;
-    struct expr* body;
-    unsigned long hash;
-};
-struct varenv {
-    struct var env[ENV_SIZE];
 };
 
 // LITERALS ================================================================= //
@@ -93,7 +108,8 @@ struct lit {
 // EXPERSSIONS ============================================================= //
 enum exprtypes {
     FUNCTION,
-    LITERAL
+    LITERAL,
+    VARIABLE
 };
 struct expr {
     enum exprtypes exprtype;
@@ -102,6 +118,8 @@ struct expr {
         struct func func;
         // LITERALS
         struct lit lit;
+        // VARIABLES
+        struct var var;
     } e;
 };
 

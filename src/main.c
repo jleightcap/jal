@@ -46,13 +46,7 @@ main(int ac, char** av) {
 
     parse(&fenv, &venv);
 
-    unsigned long main = hashstr("main");
-    // TODO: iterate over all expressions in main
-    // here, just take the last expression (assumed to be the return)
-    struct func* mainexpr = &fenv.env[main];
-
-    // print 'main' expression tree
-    print_func(mainexpr, 0);
+    print_fenv(&fenv);
 
     // emit assembly from 'main' expression tree entrypoint
     //emit(outf, &fenv, &venv);

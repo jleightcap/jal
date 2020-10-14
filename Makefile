@@ -4,16 +4,18 @@ SRCS    ?= $(wildcard src/*.c)
 OBJS    ?= $(SRCS:.c=.o)
 INCLUDE ?= ./include
 CFLAGS  ?= -D$(ARCH) \
-	   -O0 -g -Wall -Wextra -Wno-unused-parameter -pedantic \
-	   -std=c99 -I$(INCLUDE)
+	   -std=c99 -I$(INCLUDE) \
+	   -O0 -g \
+	   -Wall -Wextra -pedantic \
+	   -Wno-unused-parameter -Wno-type-limits
 
 VALGRIND ?= valgrind.out
-VFLAGS ?= --leak-check=full \
-	  --show-leak-kinds=all \
-	  --track-origins=yes \
-	  --trace-children=yes \
-	  --show-reachable=no \
-	  --log-file=$(VALGRIND)
+VFLAGS   ?= --leak-check=full \
+	    --show-leak-kinds=all \
+	    --track-origins=yes \
+	    --trace-children=yes \
+	    --show-reachable=no \
+	    --log-file=$(VALGRIND)
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $^
