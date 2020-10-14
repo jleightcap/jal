@@ -111,12 +111,14 @@ print_defun(const struct func* f)
         break;
     }
     // print function signature
+    /*
     for(unsigned int ii = 0; ii < f->argnum; ii++) {
         switch(f->ft) {
         case BUILTIN: print_type(f->args.argt[ii]); break;
         case TABLE:   printf("var[%ld]", f->args.arghash[ii]); break;
         } printf(" ");
     } printf("-> "); print_type(f->t); printf("\n");
+    */ printf("\n");
     for(unsigned int ii = 0; ii < f->exprs; ii++) {
         print_expr(f->body[ii], 2);
     }
@@ -137,12 +139,14 @@ print_func(const struct func* f, const unsigned int nest) {
         break;
     }
     // print function signature
+    /*
     for(unsigned int ii = 0; ii < f->argnum; ii++) {
         switch(f->ft) {
         case BUILTIN: print_type(f->args.argt[ii]); break;
         case TABLE:   print_type(f->venv->env[f->args.arghash[ii]].t); break;
         } printf(" ");
     } printf("-> "); print_type(f->t); printf("\n");
+    */ printf("\n");
     // print function body
     for(unsigned int ii = 0; ii < f->argnum; ii++) {
         //printf("expr %d\n", ii);
