@@ -112,8 +112,10 @@ eval(const enum type t, const struct expr* e,
                 panic("builtin not supported!\n");
             }
             break;
-        case TABLE:
-            panic("TODO: eval functions!");
+        case DEF:
+            panic("can't eval function definitions!");
+        case CALL:
+            panic("TODO: function calls!");
         }
         break;
     case LITERAL:

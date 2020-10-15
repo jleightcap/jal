@@ -103,12 +103,14 @@ print_defun(const struct func* f)
     case BUILTIN: 
         printf("defun "); print_builtin(f->name.b); printf(": ");
         break;
-    case TABLE:
+    case DEF:
         if(f->name.hash == hashstr("main"))
             printf("defun main: ");
         else
             printf("defun [%ld]: ", f->name.hash);
         break;
+    case CALL:
+        panic("function call can't be top level!")
     }
     // print function signature
     /*
@@ -131,12 +133,14 @@ print_func(const struct func* f, const unsigned int nest) {
     case BUILTIN:
         printf("func "); print_builtin(f->name.b); printf(": ");
         break;
-    case TABLE:
+    case CALL:
         if(f->name.hash == hashstr("main")) // only mandatory hash
             printf("func main: ");
         else
             printf("func [%ld]: ", f->name.hash);
         break;
+    case DEF:
+        panic("function definition not at top level!");
     }
     // print function signature
     /*

@@ -21,11 +21,21 @@ enum type {
     VOID
 };
 
+// LITERALS ================================================================= //
+struct lit {
+    enum type t;
+    union {
+        int integer;
+        char string[MAX_STRLEN];
+    } litval;
+};
+
+
 // VARIABLES ================================================================ //
 struct var {
     enum type t;
     unsigned long hash;
-    struct expr* body;
+    struct lit lit;
 };
 struct varenv {
     struct var env[ENV_SIZE];
@@ -65,7 +75,8 @@ enum builtin {
 };
 enum ftype {
     BUILTIN,
-    TABLE
+    DEF,
+    CALL
 };
 struct func {
     // metadata
@@ -88,21 +99,9 @@ struct func {
     // body
     unsigned int exprs;
     struct expr* body[MAXEXPRS];
-
-    // environment
-    struct varenv* venv;
 };
 struct funenv {
     struct func env[ENV_SIZE];
-};
-
-// LITERALS ================================================================= //
-struct lit {
-    enum type t;
-    union {
-        int integer;
-        char string[MAX_STRLEN];
-    } litval;
 };
 
 // EXPERSSIONS ============================================================= //
