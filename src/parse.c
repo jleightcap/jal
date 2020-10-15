@@ -170,7 +170,6 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             e->e.func.args.argt[0] = INT;
             e->e.func.args.argt[1] = t_resl;
             e->e.func.args.argt[2] = t_cons;
-            printf("quinary type = "); print_type(t_cons); printf("\n");
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_QUI;
             break;
@@ -326,7 +325,8 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
         fenv->env[name].args.arghash[ii] = argname; // map each argument to venv hash
         struct var* argvar = &venv->env[argname];
         currtok = scan(); // type
-        argvar->t = typetok_to_type(currtok.type);
+        enum type t = typetok_to_type(currtok.type);
+        fenv->env[name].args.argt[ii] = t; argvar->t = t;
         fenv->env[name].argnum++;
         checktok((currtok = scan()), RPAREN, "function argument end");
         assert(ii < MAXARGS && "maximum function arguments, incrase MAXARGS!");

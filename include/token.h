@@ -1,7 +1,13 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#ifndef ENV_SIZE
 #define ENV_SIZE 1000
+#endif
+
+#ifndef MAX_STRLEN
+#define MAX_STRLEN 100
+#endif
 
 // ========================================================================= //
 //                                                                           //
@@ -57,7 +63,6 @@ enum toktype {
     LE,                 // (<= a b)
 };
 
-#define MAX_STRLEN 100
 struct token {
     enum toktype type;
     union {

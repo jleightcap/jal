@@ -4,9 +4,13 @@
 #include "token.h"
 
 // maximum number of arguments to a function
+#ifndef MAXARGS
 #define MAXARGS 10
+#endif
 // maximum number of expressions in a function definition
+#ifndef MAXEXPRS
 #define MAXEXPRS 50
+#endif
 
 // ========================================================================= //
 //                                                                           //
