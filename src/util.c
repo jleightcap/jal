@@ -140,8 +140,9 @@ print_func(const struct func* f, const unsigned int nest) {
         /*
         for(unsigned int ii = 0; ii < f->argnum; ii++) {
             print_type(f->args.argt[ii]); printf(" ");
-        } printf("-> "); print_type(f->t); printf("\n");
+        } printf("-> "); print_type(f->t);
         */
+        printf("\n");
         // print body
         for(unsigned int ii = 0; ii < f->exprs; ii++) {
             print_expr(f->body[ii], nest + 1);

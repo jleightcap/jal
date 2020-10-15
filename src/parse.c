@@ -90,6 +90,16 @@ varenv_free(struct varenv* venv)
     for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
         var_free(&venv->env[ii]);
     }
+}  
+
+enum type
+expr_to_type(struct expr* e)
+{
+    switch(e->exprtype) {
+        case FUNCTION: return e->e.func.t;
+        case LITERAL:  return e->e.lit.t;
+        case VARIABLE: return e->e.var.t;
+    } panic("can't deduce type from expression!");
 }
 
 // parse an expression from tokens, populating the expression e.
@@ -152,17 +162,8 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             parse_quinary(cond, resl, cons, fenv, venv);
             checktok(currtok, RPAREN, "quinary cons end");
 
-            enum type t_resl, t_cons; // this should be a macro
-            switch(resl->exprtype) {
-            case FUNCTION: t_resl = e->e.func.t; break;
-            case LITERAL:  t_resl = e->e.lit.t;  break;
-            case VARIABLE: t_resl = e->e.var.t;  break;
-            }
-            switch(cons->exprtype) {
-            case FUNCTION: t_cons = e->e.func.t; break;
-            case LITERAL:  t_cons = e->e.lit.t;  break;
-            case VARIABLE: t_cons = e->e.var.t;  break;
-            }
+            enum type t_resl = expr_to_type(resl);
+            enum type t_cons = expr_to_type(cons);
             assert(t_resl  == t_cons &&  "result and consequence must have same type!");
             // metadata
             e->e.func.t = t_resl; // quinary return type is type branches
