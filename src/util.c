@@ -121,29 +121,26 @@ print_func(const struct func* f, const unsigned int nest) {
     case DEF:
         panic("function definition not at top level!");
     case BUILTIN:
-        printf("func "); print_builtin(f->name.b); printf(": ");
-        goto printbody;
-    case CALL:
-        if(f->name.hash == hashstr("main")) {// only mandatory hash
-            panic("main is implicitly called!");
-        } else {
-            printf("func [%ld]: ", f->name.hash);
-        }
-        goto printbody;
-
-    printbody:
-        // print signature
-        /*
-        for(unsigned int ii = 0; ii < f->argnum; ii++) {
-            print_type(f->args.argt[ii]); printf(" ");
-        } printf("-> "); print_type(f->t);
-        */
-        printf("\n");
+        printf("func "); print_builtin(f->name.b); printf(": "); printf("\n");
+        // TODO: print function signature
         // print body
         for(unsigned int ii = 0; ii < f->exprs; ii++) {
             print_expr(f->body[ii], nest + 1);
         }
         break;
+    case CALL:
+        if(f->name.hash == hashstr("main")) {// only mandatory hash
+            panic("main is implicitly called!");
+        } else {
+            printf("func [%ld]: ", f->name.hash); printf("\n");
+            // TODO: print function signature
+            // print body
+            for(unsigned int ii = 0; ii < f->argnum; ii++) {
+                print_expr(f->body[ii], nest + 1);
+            }
+        }
+        break;
+
     }
 }
 
