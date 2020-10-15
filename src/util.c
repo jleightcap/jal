@@ -38,12 +38,9 @@ void
 print_type(const enum type t)
 {
     switch(t) {
-    case INT:
-        printf("int"); break;
-    case STRING:
-        printf("string"); break;
-    case VOID:
-        printf("void"); break;
+    case INT:    printf("int"); break;
+    case STRING: printf("string"); break;
+    case VOID:   printf("void"); break;
     }
 }
 
@@ -74,7 +71,6 @@ print_builtin(const enum builtin b)
     case F_RET:   printf("ret");   break;
     case F_PRINT: printf("print"); break;
     }
-    return;
 }
 
 // print a nice looking indent

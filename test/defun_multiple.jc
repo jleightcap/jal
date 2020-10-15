@@ -5,5 +5,5 @@
     (ret (* x 5))
 )
 (defun (main `int)
-    (ret (+ (f 2 3 2) (g 7)))
+    (ret (+ (f 2 3 2) 2))
 )

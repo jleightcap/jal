@@ -28,8 +28,18 @@ void parse_quinary(struct expr* cond, struct expr* resl, struct expr* cons,
 void
 func_free(struct func* f)
 {
-    for(unsigned int ii = 0; ii < f->exprs; ii++) {
-        expr_free(f->body[ii]);
+    switch(f->ft) {
+    case BUILTIN:
+    case DEF:
+        for(unsigned int ii = 0; ii < f->exprs; ii++) {
+            expr_free(f->body[ii]);
+        }
+        break;
+    case CALL:
+        for(unsigned int ii = 0; ii < f->argnum; ii++) {
+            expr_free(f->body[ii]);
+        }
+        break;
     }
 }
 
@@ -117,13 +127,13 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         switch(currtok.type) {
         // resrved symbols
         case DEVAR:
-            //printf("devar\n");
+            printf("devar\n");
             panic("TODO: scoped devar!\n");
         case DEFUN: // define the builtin 'defun' function
-            //printf("defun\n");
+            printf("defun\n");
             panic("defun not at top level!");
         case RET: // define the builtin 'ret' function
-            //printf("ret\n");
+            printf("ret\n");
             // arguments
             e->e.func.argnum = 1; e->e.func.args.argt[0] = INT;
             // expresions
@@ -137,7 +147,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             e->e.func.name.b = F_RET;
             break;
         case PRINT:
-            //printf("print\n");
+            printf("print\n");
             // arguments
             e->e.func.argnum = 1; e->e.func.args.argt[0] = STRING;
             // expressions
@@ -151,7 +161,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             e->e.func.name.b = F_PRINT;
             break;
         case QUINARY:
-            //printf("quinary\n");
+            printf("quinary\n");
             // TODO: the consequence branch should be optional
             // expressions
             e->e.func.exprs = 3;
@@ -188,6 +198,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case LE:  e->e.func.name.b = F_LE;  goto builtin_binops;
 
         builtin_binops:
+            printf("binop\n");
             // arguments
             e->e.func.argnum = 2;
             e->e.func.args.argt[0] = INT;
@@ -206,21 +217,21 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
 
         // symbol preceded by LPAREN must be a function reference
         case SYM:
-            //printf("func call\n");
+            printf("func call\n");
             e->e.func.ft = CALL;
             assert(fenv->env[currtok.value.hash].body[0] != NULL
                    && "calling undefined function!");
             e->e.func.name.hash = fenv->env[currtok.value.hash].name.hash;
-            e->e.func.argnum = 0;
+            e->e.func.argnum = fenv->env[currtok.value.hash].argnum;
             e->e.func.exprs = fenv->env[currtok.value.hash].exprs;
             currtok = scan();
-            //printf("args = %d\n", e->e.func.argnum);
-            for(unsigned int ii = 0; ii < e->e.func.exprs; ii++) {
+            printf("args = %d\n", e->e.func.argnum);
+            for(unsigned int ii = 0; ii < e->e.func.argnum; ii++) {
                 assert(currtok.type != RPAREN && "expected another argument!");
                 e->e.func.body[ii] = expr_init();
                 parse_expr(e->e.func.body[ii], fenv, venv);
+                printf("parsed expr %d\n", ii);
                 currtok = scan();
-                //printf("parsed expr %d\n", ii);
             }
             checktok(currtok, RPAREN, "function arguments end");
             //printf("sym end %d\n", currtok.type);
@@ -238,11 +249,13 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
 
     // atoms
     case A_INT:
+        printf("int literal\n");
         e->exprtype = LITERAL;
         e->e.lit.t = INT;
         e->e.lit.litval.integer = currtok.value.num;
         break;
     case A_STR:
+        printf("string literal\n");
         e->exprtype = LITERAL;
         e->e.lit.t = STRING;
         memcpy(e->e.lit.litval.string, currtok.value.str, MAX_STRLEN + 1);
@@ -332,6 +345,7 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
         checktok((currtok = scan()), RPAREN, "function argument end");
         assert(ii < MAXARGS && "maximum function arguments, incrase MAXARGS!");
     }
+    printf("parsed %d for func %ld\n", fenv->env[name].argnum, name);
     checktok(currtok, RPAREN, "function signature end");
 
     // FUNCTION BODY PARSING
