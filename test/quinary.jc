@@ -1,5 +1,4 @@
 (devar (x `int) 1)
 (defun (main `int)
-    (? (<= x 2) 2 3)
-    (ret 0)
+    (ret (? (<= x 2) 2 3))
 )

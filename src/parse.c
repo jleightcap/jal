@@ -149,7 +149,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_QUI;
             // TODO: the consequence branch should be optional
-            e->e.func.argnum = 3;
+            e->e.func.exprs = 3;
             struct expr* cond = (e->e.func.body[0] = expr_init());
             struct expr* resl = (e->e.func.body[1] = expr_init());
             struct expr* cons = (e->e.func.body[2] = expr_init());

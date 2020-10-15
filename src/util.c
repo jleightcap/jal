@@ -112,15 +112,7 @@ print_defun(const struct func* f)
     case CALL:
         panic("function call can't be top level!")
     }
-    // print function signature
-    /*
-    for(unsigned int ii = 0; ii < f->argnum; ii++) {
-        switch(f->ft) {
-        case BUILTIN: print_type(f->args.argt[ii]); break;
-        case TABLE:   printf("var[%ld]", f->args.arghash[ii]); break;
-        } printf(" ");
-    } printf("-> "); print_type(f->t); printf("\n");
-    */ printf("\n");
+    printf("\n");
     for(unsigned int ii = 0; ii < f->exprs; ii++) {
         print_expr(f->body[ii], 2);
     }
@@ -130,31 +122,27 @@ print_defun(const struct func* f)
 void
 print_func(const struct func* f, const unsigned int nest) {
     switch(f->ft) {
-    case BUILTIN:
-        printf("func "); print_builtin(f->name.b); printf(": ");
-        break;
-    case CALL:
-        if(f->name.hash == hashstr("main")) // only mandatory hash
-            printf("func main: ");
-        else
-            printf("func [%ld]: ", f->name.hash);
-        break;
     case DEF:
         panic("function definition not at top level!");
-    }
-    // print function signature
-    /*
-    for(unsigned int ii = 0; ii < f->argnum; ii++) {
-        switch(f->ft) {
-        case BUILTIN: print_type(f->args.argt[ii]); break;
-        case TABLE:   print_type(f->venv->env[f->args.arghash[ii]].t); break;
-        } printf(" ");
-    } printf("-> "); print_type(f->t); printf("\n");
-    */ printf("\n");
-    // print function body
-    for(unsigned int ii = 0; ii < f->argnum; ii++) {
-        //printf("expr %d\n", ii);
-        print_expr(f->body[ii], nest + 1);
+    case BUILTIN:
+        printf("func "); print_builtin(f->name.b); printf(": ");
+        // TODO: print signature
+        printf("\n");
+        goto printbody;
+    case CALL:
+        if(f->name.hash == hashstr("main")) {// only mandatory hash
+            panic("main is implicitly called!");
+        } else {
+            printf("func [%ld]: \n", f->name.hash);
+            // TODO: print signature
+        }
+        goto printbody;
+
+    printbody:
+        for(unsigned int ii = 0; ii < f->exprs; ii++) {
+            print_expr(f->body[ii], nest + 1);
+        }
+        break;
     }
 }
 
