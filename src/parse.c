@@ -49,7 +49,7 @@ struct expr*
 expr_init(void)
 {
     exprcount++;
-    printf("exprinit %d\n", exprcount);
+    //printf("exprinit %d\n", exprcount);
     return malloc(sizeof(struct expr));
 }
 
@@ -57,7 +57,7 @@ void
 expr_free(struct expr* e)
 {
     exprcount--;
-    printf("exprfree %d\n", exprcount);
+    //printf("exprfree %d\n", exprcount);
     switch(e->exprtype) {
     case FUNCTION:
         func_free(&e->e.func);
@@ -75,7 +75,7 @@ expr_free(struct expr* e)
 void
 funenv_free(struct funenv* fenv)
 {
-    // iterate over whole function environment, most is probably empty
+    // iterate over whole function environment (most is probably empty)
     for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
         // found a function; has expressions
         if(fenv->env[ii].exprs > 0) {
@@ -107,61 +107,72 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         switch(currtok.type) {
         // resrved symbols
         case DEVAR:
-            //printf("inner devar\n");
-            /*
-            e->e.func.t = VOID;
-            e->e.func.ft = BUILTIN;
-            e->e.func.name.b = F_DEVAR;
-            e->e.func.exprs = 0;
-            e->e.func.argnum = 1;
-            parse_devar(fenv, venv);
-            */
+            //printf("devar\n");
             panic("TODO: scoped devar!\n");
-            break;
-        case DEFUN:
+        case DEFUN: // define the builtin 'defun' function
+            //printf("defun\n");
             panic("defun not at top level!");
-        case RET:
+        case RET: // define the builtin 'ret' function
             //printf("ret\n");
-            e->e.func.t = VOID;
-            e->e.func.ft = BUILTIN;
-            e->e.func.name.b = F_RET;
-            e->e.func.argnum = 1;
-            e->e.func.args.argt[0] = INT;
+            // arguments
+            e->e.func.argnum = 1; e->e.func.args.argt[0] = INT;
+            // expresions
             e->e.func.exprs = 1;
             currtok = scan();
             parse_expr(e->e.func.body[0] = expr_init(), fenv, venv);
             checktok((currtok = scan()), RPAREN, "return end");
+            // metadata
+            e->e.func.t = VOID;
+            e->e.func.ft = BUILTIN;
+            e->e.func.name.b = F_RET;
             break;
         case PRINT:
             //printf("print\n");
-            e->e.func.t = VOID;
-            e->e.func.ft = BUILTIN;
-            e->e.func.name.b = F_PRINT;
-            e->e.func.argnum = 0;
+            // arguments
+            e->e.func.argnum = 1; e->e.func.args.argt[0] = STRING;
+            // expressions
             e->e.func.exprs = 1;
-            e->e.func.args.argt[0] = STRING;
             currtok = scan();
             parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
             currtok = scan();
+            // metadata
+            e->e.func.t = VOID;
+            e->e.func.ft = BUILTIN;
+            e->e.func.name.b = F_PRINT;
             break;
         case QUINARY:
             //printf("quinary\n");
-            e->e.func.ft = BUILTIN;
-            e->e.func.name.b = F_QUI;
             // TODO: the consequence branch should be optional
+            // expressions
             e->e.func.exprs = 3;
             struct expr* cond = (e->e.func.body[0] = expr_init());
             struct expr* resl = (e->e.func.body[1] = expr_init());
             struct expr* cons = (e->e.func.body[2] = expr_init());
-
             checktok((currtok = scan()), LPAREN, "quinary cond beginning");
             parse_quinary(cond, resl, cons, fenv, venv);
             checktok(currtok, RPAREN, "quinary cons end");
 
-            enum type t_resl = (resl->exprtype == FUNCTION) ? resl->e.func.t : resl->e.lit.t;
-            enum type t_cons = (cons->exprtype == FUNCTION) ? cons->e.func.t : cons->e.lit.t;
+            enum type t_resl, t_cons; // this should be a macro
+            switch(resl->exprtype) {
+            case FUNCTION: t_resl = e->e.func.t; break;
+            case LITERAL:  t_resl = e->e.lit.t;  break;
+            case VARIABLE: t_resl = e->e.var.t;  break;
+            }
+            switch(cons->exprtype) {
+            case FUNCTION: t_cons = e->e.func.t; break;
+            case LITERAL:  t_cons = e->e.lit.t;  break;
+            case VARIABLE: t_cons = e->e.var.t;  break;
+            }
             assert(t_resl  == t_cons &&  "result and consequence must have same type!");
-            e->e.func.t = t_resl; // quinary return type of each branch
+            // metadata
+            e->e.func.t = t_resl; // quinary return type is type branches
+            e->e.func.argnum = 3;
+            e->e.func.args.argt[0] = INT;
+            e->e.func.args.argt[1] = t_resl;
+            e->e.func.args.argt[2] = t_cons;
+            printf("quinary type = "); print_type(t_cons); printf("\n");
+            e->e.func.ft = BUILTIN;
+            e->e.func.name.b = F_QUI;
             break;
 
         case ADD: e->e.func.name.b = F_ADD; goto builtin_binops;
@@ -177,15 +188,20 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case LE:  e->e.func.name.b = F_LE;  goto builtin_binops;
 
         builtin_binops:
-            e->e.func.t = INT;
-            e->e.func.ft = BUILTIN;
-            e->e.func.argnum = 0;
+            // arguments
+            e->e.func.argnum = 2;
+            e->e.func.args.argt[0] = INT;
+            e->e.func.args.argt[1] = INT;
+            // expressions
             e->e.func.exprs = 2;
             currtok = scan(); // begin first argument
             parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
             currtok = scan(); // begin second argument
             parse_expr((e->e.func.body[1] = expr_init()), fenv, venv);
             currtok = scan();
+            // metadata
+            e->e.func.t = INT;
+            e->e.func.ft = BUILTIN;
             break;
 
         // symbol preceded by LPAREN must be a function reference
