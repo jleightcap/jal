@@ -1,0 +1,9 @@
+(defun (f `int (x `int))
+    (ret (+ (* 2 x) x))
+)
+
+(devar (x `int) (f 10))
+
+(defun (main `int)
+    (ret (+ x 12))
+)

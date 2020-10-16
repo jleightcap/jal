@@ -37,22 +37,19 @@ main(int ac, char** av) {
         return -1;
     }
 
-    struct funenv fenv;        // function environment
-    struct varenv venv; // global variable environment
-    // zero out environments
-    memset(fenv.env, 0, sizeof(fenv.env));
-    memset(venv.env, 0, sizeof(venv.env));
+    struct funenv* fenv = calloc(1, sizeof(struct funenv)); // function environment
+    struct varenv* venv = calloc(1, sizeof(struct varenv)); // global variable environment
     setstream(file, sb.st_size);
 
-    parse(&fenv, &venv);
+    parse(fenv, venv);
 
-    print_fenv(&fenv);
+    print_fenv(fenv);
 
     // emit assembly from 'main' expression tree entrypoint
     //emit(outf, &fenv, &venv);
 
-    funenv_free(&fenv);
-    varenv_free(&venv);
+    funenv_free(fenv);
+    varenv_free(venv);
 
     return 0;
 }

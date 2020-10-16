@@ -18,6 +18,8 @@ eval(const enum type t, const struct expr* e,
         for(unsigned int ii = 0; ii < e->e.func.exprs; ii++)
             args[ii] = eval(t, e->e.func.body[ii], fenv, venv);
         switch(e->e.func.ft) {
+        case DEF:
+            panic("can't eval function definitions!");
         case BUILTIN:
             switch(e->e.func.name.b) {
             case F_ADD:
@@ -112,10 +114,8 @@ eval(const enum type t, const struct expr* e,
                 panic("builtin not supported!\n");
             }
             break;
-        case DEF:
-            panic("can't eval function definitions!");
         case CALL:
-            panic("TODO: function calls!");
+            panic("TODO: function calls!\n");
         }
         break;
     case LITERAL:

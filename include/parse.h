@@ -93,7 +93,7 @@ struct func {
     
     // args
     unsigned int argnum;
-    union {
+    struct {
         // arguments are variables, use hash to look up in venv
         unsigned long arghash[MAXARGS];
         // arguments are just a type, for builtin functions
@@ -103,6 +103,9 @@ struct func {
     // body
     unsigned int exprs;
     struct expr* body[MAXEXPRS];
+
+    // variable environment
+    struct venv* venv;
 };
 struct funenv {
     struct func env[ENV_SIZE];
