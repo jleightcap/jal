@@ -90,6 +90,12 @@ print_fenv(const struct funenv* f) {
     }
 }
 
+void
+print_venv(const struct varenv* v)
+{
+    panic("TODO: variable definition doesn't allow for knowing usage!");
+}
+
 // print a top-level defun, calls print_expr on each body expression
 void
 print_defun(const struct func* f)
@@ -129,9 +135,10 @@ print_func(const struct func* f, const unsigned int nest) {
         }
         break;
     case CALL:
-        if(f->name.hash == hashstr("main")) {// only mandatory hash
-            panic("main is implicitly called!");
-        } else {
+        if(f->name.hash == hashstr("main")) { // only mandatory hash
+            panic("main is only implicitly called!");
+        }
+        else {
             printf("func [%ld]: ", f->name.hash); printf("\n");
             // TODO: print function signature
             // print body
@@ -140,7 +147,6 @@ print_func(const struct func* f, const unsigned int nest) {
             }
         }
         break;
-
     }
 }
 
@@ -162,6 +168,12 @@ print_lit(const struct lit* l, const unsigned int nest)
     }
 }
 
+void
+print_var(const struct var* v, const unsigned int nest)
+{
+    printf("[%ld] :variable hash\n", v->hash);
+}
+
 // recursively print an expression.
 void
 print_expr(const struct expr* e, const unsigned int nest)
@@ -178,7 +190,7 @@ print_expr(const struct expr* e, const unsigned int nest)
         break;
     case VARIABLE:
         //printf("variable\n");
-        printf("[%ld] :variable hash\n", e->e.var.hash);
+        print_var(&e->e.var, nest + 1);
         break;
     }
 }

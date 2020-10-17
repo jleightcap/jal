@@ -39,10 +39,14 @@ enum toktype {
     DEVAR,
     RET,
     PRINT,
+    WHILE,
+    FOR,
 
     // operators
     ADD,                // (+ a b)
+    INC,                // (++ a)
     SUB,                // (- a b)
+    DEC,                // (-- a)
     MUL,                // (* a b)
     DIV,                // (/ a b)
     MOD,                // (% a b)

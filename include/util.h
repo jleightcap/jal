@@ -32,6 +32,9 @@ void
 print_fenv(const struct funenv* fenv);
 
 void
+print_venv(const struct varenv* venv);
+
+void
 print_defun(const struct func* f);
 
 void
@@ -39,6 +42,9 @@ print_func(const struct func* f, const unsigned int nest);
 
 void
 print_lit(const struct lit* l, const unsigned int nest);
+
+void
+print_var(const struct var* v, const unsigned int nest);
 
 void
 print_expr(const struct expr* e, const  unsigned int nest);

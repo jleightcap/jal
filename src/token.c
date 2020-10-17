@@ -37,6 +37,9 @@ scan()
 
     // SYMBOLS
     if(issymbol(file[fp])) {
+        // to reduce the number of hash table collisions, keep track of the
+        // length of symbol tokens. If some variable name happens to hash
+        // to same hash as 'while', lengths must also match for a collision.
         unsigned int symlen = 0;
         unsigned long hash = file[fp];
         // symbols can't start with number characters, but can include them
@@ -46,23 +49,32 @@ scan()
             symlen++;
         }
         tok.value.hash = hash;
+
         // RESERVED KEYWORD HASHES
-        if(hash == hashstr("main") && symlen == 4)
+        if(hash == hashstr("main") && symlen == 4) {
             tok.type = MAIN;
-        else
-        if(hash == hashstr("defun") && symlen == 5)
+        }
+        else if(hash == hashstr("defun") && symlen == 5) {
             tok.type = DEFUN;
-        else
-        if(hash == hashstr("devar") && symlen == 5)
+        }
+        else if(hash == hashstr("devar") && symlen == 5) {
             tok.type = DEVAR;
-        else
-        if(hash == hashstr("ret") && symlen == 3)
+        }
+        else if(hash == hashstr("ret") && symlen == 3) {
             tok.type = RET;
-        else
-        if(hash == hashstr("print") && symlen == 5)
+        }
+        else if(hash == hashstr("print") && symlen == 5) {
             tok.type = PRINT;
-        else
+        }
+        else if(hash == hashstr("while") && symlen == 5) {
+            tok.type = WHILE;
+        }
+        else if(hash == hashstr("for") && symlen == 3) {
+            tok.type = FOR;
+        }
+        else {
             tok.type = SYM;
+        }
         return tok;
     }
 
@@ -145,7 +157,7 @@ scan()
     case '>': switch(file[fp + 1]) {
               case '>': tok.type = LSR; fp++; break;
               case '=': tok.type = GE;  fp++; break;
-              default:  tok.type = GT;  break;
+              default:  tok.type = GT;        break;
               } fp++; return tok;
     case '=': switch(file[fp + 1]) {
               case '=': tok.type = EQ;     fp++; break;
@@ -161,7 +173,7 @@ scan()
               } fp++; return tok;
     case '-': switch(file[fp + 1]) {
               case '-': tok.type = DEC; fp++; break;
-              default:  tok.type = SUB; break;
+              default:  tok.type = SUB;       break;
               } fp++; return tok;
     default: break;
     }

@@ -136,10 +136,6 @@ struct expr {
 //                                                                          //
 // ======================================================================== //
 
-// parse tokens in a given function environment (fenv) and variable environment (venv)
-void
-parse(struct funenv* fenv, struct varenv* venv);
-
 // initialize/free an expression
 struct expr*
 expr_init(void);
@@ -156,5 +152,20 @@ varenv_free(struct varenv* venv);
 
 enum type
 typetok_to_type(const enum toktype t);
+
+// parse tokens in a given function environment (fenv) and variable environment (venv)
+void
+parse(struct funenv* fenv, struct varenv* venv);
+
+/*
+parse_expr
+parse_defun
+parse_devar
+parse_ret
+parse_print
+parse_quinary
+parse_binop
+parse_sym
+*/
 
 #endif

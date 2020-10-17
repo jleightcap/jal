@@ -1,0 +1,6 @@
+(defun (main `int)
+    (devar (ii `int) 0)
+    (while (< ii 10)
+        (++ ii)
+    )
+)
