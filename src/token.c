@@ -129,8 +129,6 @@ scan()
     switch(file[fp]) {
     case '(': fp++; tok.type = LPAREN;  return tok;
     case ')': fp++; tok.type = RPAREN;  return tok;
-    case '+': fp++; tok.type = ADD;     return tok;
-    case '-': fp++; tok.type = SUB;     return tok;
     case '*': fp++; tok.type = MUL;     return tok;
     case '/': fp++; tok.type = DIV;     return tok;
     case '?': fp++; tok.type = QUINARY; return tok;
@@ -139,24 +137,31 @@ scan()
 
     // OVERLAPING CHARACTER TOKENS
     switch(file[fp]) {
-    case '<': fp++;
-              switch(file[fp]) {
-              case '<': tok.type = LSL; break;
-              case '=': tok.type = LE;  break;
-              default:  tok.type = LT;  break;
+    case '<': switch(file[fp + 1]) {
+              case '<': tok.type = LSL; fp++; break;
+              case '=': tok.type = LE;  fp++; break;
+              default:  tok.type = LT;        break;
               } fp++; return tok;
-    case '>': switch(file[++fp]) {
-              case '>': tok.type = LSR; break;
-              case '=': tok.type = GE;  break;
+    case '>': switch(file[fp + 1]) {
+              case '>': tok.type = LSR; fp++; break;
+              case '=': tok.type = GE;  fp++; break;
               default:  tok.type = GT;  break;
               } fp++; return tok;
-    case '=': switch(file[++fp]) {
-              case '=': tok.type = EQ;     break;
-              default:  tok.type = ASSIGN; break;
+    case '=': switch(file[fp + 1]) {
+              case '=': tok.type = EQ;     fp++; break;
+              default:  tok.type = ASSIGN;       break;
               } fp++; return tok;
-    case '!': switch(file[++fp]) {
-              case '=': tok.type = NE;  break;
-              default:  tok.type = NOT; break;
+    case '!': switch(file[fp + 1]) {
+              case '=': tok.type = NE;  fp++; break;
+              default:  tok.type = NOT;       break;
+              } fp++; return tok;
+    case '+': switch(file[fp + 1]) {
+              case '+': tok.type = INC; fp++; break;
+              default:  tok.type = ADD;       break;
+              } fp++; return tok;
+    case '-': switch(file[fp + 1]) {
+              case '-': tok.type = DEC; fp++; break;
+              default:  tok.type = SUB; break;
               } fp++; return tok;
     default: break;
     }
