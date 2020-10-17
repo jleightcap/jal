@@ -13,6 +13,7 @@ eval(const enum type t, const struct expr* e,
     struct lit lit;
     struct lit args[MAXARGS];
     lit.t = t;
+
     switch(e->exprtype) {
     case FUNCTION:
         for(unsigned int ii = 0; ii < e->e.func.exprs; ii++)
@@ -117,8 +118,8 @@ eval(const enum type t, const struct expr* e,
         case CALL:
         {
             struct func f = fenv->env[e->e.func.name.hash];
-            print_defun(&f);
             // type-check, and populate function's arguments
+            assert(f.argnum == e->e.func.argnum && "incorrect number of arguments!");
             for(unsigned int ii = 0; ii < f.argnum; ii++) {
                 unsigned long varhash = f.args.arghash[ii];
                 enum type argt = f.args.argt[ii];
@@ -127,12 +128,27 @@ eval(const enum type t, const struct expr* e,
                 assert(argt == lit.t && "evaluating type mismatch!");
 
                 // hmmm... I'm changing the global venv argument here...
-                // if something goes wrong, look here pal :-)
+                // if something goes wrong with variables, look here pal :-)
                 venv->env[varhash].lit = argii;
             }
             for(unsigned int ii = 0; ii < f.exprs; ii++) {
+                // unwrap Matryoshka-style for special return case
+                if(f.body[ii]->exprtype == FUNCTION &&
+                   f.body[ii]->e.func.ft == BUILTIN &&
+                   f.body[ii]->e.func.name.b == F_RET)
+                {
+                    assert(f.body[ii]->e.func.exprs == 1 && "expected 1 return expression!");
+                    lit = eval(f.t, f.body[ii]->e.func.body[0], fenv, venv);
+                    printf("evaluated literal: ");
+                    print_lit(&lit, 0);
+                }
+                else {
+                    // not 'return': the expression may change the environment,
+                    // but discard the literal result
+                    eval(f.t, f.body[ii], fenv, venv);
+                }
             }
-            exit(1);
+            break;
         }
         }
         break;
@@ -140,7 +156,10 @@ eval(const enum type t, const struct expr* e,
         lit = e->e.lit;
         break;
     case VARIABLE:
-        panic("TODO: variables in eval!");
+        lit = venv->env[e->e.var.hash].lit;
+        break;
+    default:
+        panic("unhandled expression type in eval!");
     }
     return lit;
 }
