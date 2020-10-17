@@ -5,7 +5,7 @@
 #include "parse.h"
 
 #define panic(str) \
-    fputs(str, stderr); exit(-1);
+    fprintf(stderr, str); exit(-1);
 
 #define typeassert(expr, type) \
     assert(expr.expression.literal.t == type && "type mismatch!");
@@ -36,6 +36,9 @@ print_defun(const struct func* f);
 
 void
 print_func(const struct func* f, const unsigned int nest);
+
+void
+print_lit(const struct lit* l, const unsigned int nest);
 
 void
 print_expr(const struct expr* e, const  unsigned int nest);

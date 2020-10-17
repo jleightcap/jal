@@ -8,7 +8,7 @@
 
 struct lit
 eval(const enum type t, const struct expr* e,
-     const struct funenv* fenv, const struct varenv* venv)
+     const struct funenv* fenv, struct varenv* venv)
 {
     struct lit lit;
     struct lit args[MAXARGS];
@@ -115,7 +115,25 @@ eval(const enum type t, const struct expr* e,
             }
             break;
         case CALL:
-            panic("TODO: function calls!\n");
+        {
+            struct func f = fenv->env[e->e.func.name.hash];
+            print_defun(&f);
+            // type-check, and populate function's arguments
+            for(unsigned int ii = 0; ii < f.argnum; ii++) {
+                unsigned long varhash = f.args.arghash[ii];
+                enum type argt = f.args.argt[ii];
+
+                struct lit argii = eval(argt, e->e.func.body[ii], fenv, venv);
+                assert(argt == lit.t && "evaluating type mismatch!");
+
+                // hmmm... I'm changing the global venv argument here...
+                // if something goes wrong, look here pal :-)
+                venv->env[varhash].lit = argii;
+            }
+            for(unsigned int ii = 0; ii < f.exprs; ii++) {
+            }
+            exit(1);
+        }
         }
         break;
     case LITERAL:

@@ -1,8 +1,8 @@
-(defun (f `int (x `int))
-    (ret (+ (* 2 x) x))
+(defun (f `int (x `int) (b `int))
+    (ret (+ (* 2 x) b))
 )
 
-(devar (x `int) (f 10))
+(devar (x `int) (f 10 5))
 
 (defun (main `int)
     (ret (+ x 12))

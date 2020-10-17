@@ -129,12 +129,13 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         currtok = scan(); // operator
         switch(currtok.type) {
         // resrved symbols
-        case DEVAR:
-            //printf("devar\n");
-            panic("TODO: scoped devar!\n");
         case DEFUN: // define the builtin 'defun' function
             //printf("defun\n");
             panic("defun not at top level!");
+        case DEVAR:
+            //printf("devar\n");
+            parse_devar(fenv, venv);
+            break;
         case RET: // define the builtin 'ret' function
             //printf("ret\n");
             // arguments

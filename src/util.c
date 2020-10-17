@@ -144,6 +144,24 @@ print_func(const struct func* f, const unsigned int nest) {
     }
 }
 
+void
+print_lit(const struct lit* l, const unsigned int nest)
+{
+    switch(l->t) {
+    case INT:
+        printf("%d :integer literal\n", l->litval.integer);
+        break;
+    case STRING:
+        printf("\"%s\" :string literal\n", l->litval.string);
+        break;
+    case VOID:
+        printf("void literal\n");
+        break;
+    default:
+        panic("printing unsuported type literal!");
+    }
+}
+
 // recursively print an expression.
 void
 print_expr(const struct expr* e, const unsigned int nest)
@@ -156,17 +174,7 @@ print_expr(const struct expr* e, const unsigned int nest)
         break;
     case LITERAL:
         //printf("literal\n");
-        switch(e->e.lit.t) {
-        case INT:
-            printf("%d :integer literal\n", e->e.lit.litval.integer);
-            break;
-        case STRING:
-            printf("\"%s\" :string literal\n", e->e.lit.litval.string);
-            break;
-        case VOID:
-            printf("void literal\n");
-            break;
-        }
+        print_lit(&e->e.lit, nest + 1);
         break;
     case VARIABLE:
         //printf("variable\n");

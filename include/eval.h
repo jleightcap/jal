@@ -9,6 +9,6 @@
 // literal type at compile time.
 struct lit
 eval(const enum type t, const struct expr* e,
-     const struct funenv* fenv, const struct varenv* venv);
+     const struct funenv* fenv, struct varenv* venv);
 
 #endif
