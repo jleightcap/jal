@@ -5,10 +5,12 @@
 #include "parse.h"
 
 #define panic(str) \
-    fprintf(stderr, str); exit(-1);
+    fprintf(stderr, str); \
+    fprintf(stderr, "\n"); \
+    exit(-1);
 
-#define typeassert(expr, type) \
-    assert(expr.expression.literal.t == type && "type mismatch!");
+#define checktok(tok, expect, str) \
+    assert(tok.type == expect && str);
 
 int
 iswhitespace(char c);

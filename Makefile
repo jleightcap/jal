@@ -5,9 +5,12 @@ OBJS    ?= $(SRCS:.c=.o)
 INCLUDE ?= ./include
 CFLAGS  ?= -D$(ARCH) \
 	   -std=c99 -I$(INCLUDE) \
-	   -O0 -g \
-	   -Wall -Wextra -pedantic \
-	   -Wno-unused-parameter -Wno-type-limits
+	  -Wall -Wextra -pedantic \
+	  -Wno-unused-parameter -Wno-type-limits
+# release flags
+RFLAGS ?= -O3
+# debug flags
+DFLAGS ?= -O0 -g
 
 VALGRIND ?= valgrind.out
 VFLAGS   ?= --leak-check=full \
@@ -21,7 +24,7 @@ $(BIN): $(OBJS)
 	$(CC) -o $@ $^
 
 %.o: %.c $(wildcard $(INCLUDE)/*.h)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(DFLAGS) -c -o $@ $<
 
 %.o: %.s
 	riscv64-linux-gnu-as -o $@ $^

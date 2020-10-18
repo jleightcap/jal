@@ -139,8 +139,6 @@ eval(const enum type t, const struct expr* e,
                 {
                     assert(f.body[ii]->e.func.exprs == 1 && "expected 1 return expression!");
                     lit = eval(f.t, f.body[ii]->e.func.body[0], fenv, venv);
-                    printf("evaluated literal: ");
-                    print_lit(&lit, 0);
                 }
                 else {
                     // not 'return': the expression may change the environment,

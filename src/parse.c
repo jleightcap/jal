@@ -12,7 +12,7 @@ struct token currtok;
 
 unsigned int exprcount = 0;
 
-// parse functions
+// parse function signatures
 void parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_defun(struct funenv* fenv, struct varenv* venv);
 void parse_devar(struct funenv* fenv, struct varenv* venv);
@@ -20,13 +20,7 @@ void parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_sym(struct expr* e, struct funenv* fenv, struct varenv* venv);
-
-#define checktok(tok, expect, str) \
-    if(tok.type != expect) { \
-        fprintf(stderr, "%s - didn't find expected token!\n", str); \
-        exit(-1); \
-    }
+void parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv);
 
 struct expr*
 expr_init(void)
@@ -137,6 +131,11 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             panic("function definitions only at top level!");
         case DEVAR:
             //printf("devar\n");
+            e->exprtype = FUNCTION;
+            e->e.func.ft = BUILTIN;
+            e->e.func.name.b = F_DEVAR;
+            e->e.func.exprs = 0;
+            e->e.func.argnum = 0;
             parse_devar(fenv, venv);
             break;
         case RET: // define the builtin 'ret' function
@@ -171,7 +170,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         // symbol preceded by LPAREN must be a function reference
         case SYM:
             //printf("func call\n");
-            parse_sym(e, fenv, venv);
+            parse_call(e, fenv, venv);
             break;
         default:
             panic("unexpected function!");
@@ -247,7 +246,7 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
         checktok(currtok, LPAREN, "function body expression begin");
         unsigned int ii = fenv->env[name].exprs;
         struct expr* e = (fenv->env[name].body[ii] = expr_init());
-        parse_expr(e, fenv, venv);
+        parse_expr(e, fenv, fenv->env[name].venv);
         fenv->env[name].exprs++;
         checktok(currtok, RPAREN, "function body expression end");
         assert(ii < MAXEXPRS && "maximum function expressions, increase MAXEXPRS!");
@@ -262,6 +261,7 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
 void
 parse_devar(struct funenv* fenv, struct varenv* venv)
 {
+    printf("parsing in venv %p\n", (void*)venv);
     // VARIABLE SIGNATURE PARSING
     checktok((currtok = scan()), LPAREN, "variable signature begin");
     currtok = scan(); // variable name
@@ -375,13 +375,13 @@ parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
     e->e.func.ft = BUILTIN;
 }
 
-// parse a symbol in the given environments
+// parse a function call symbol in the given environments
 void
-parse_sym(struct expr* e, struct funenv* fenv, struct varenv* venv)
+parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
     e->e.func.ft = CALL;
     assert(fenv->env[currtok.value.hash].body[0] != NULL
-           && "calling undefined function!");
+           && "calling an undefined function!");
     e->e.func.name.hash = fenv->env[currtok.value.hash].name.hash;
     e->e.func.argnum = fenv->env[currtok.value.hash].argnum;
     e->e.func.exprs = fenv->env[currtok.value.hash].exprs;

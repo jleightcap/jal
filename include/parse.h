@@ -105,7 +105,7 @@ struct func {
     struct expr* body[MAXEXPRS];
 
     // variable environment
-    struct venv* venv;
+    struct varenv* venv;
 };
 struct funenv {
     struct func env[ENV_SIZE];
