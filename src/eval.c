@@ -29,15 +29,11 @@ eval(const enum type t, const struct expr* e,
                 lit.litval.integer =
                     args[0].litval.integer + args[1].litval.integer;
                 break;
-            case F_INC:
-                panic("TODO: assignment in operator");
             case F_SUB:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
                     args[0].litval.integer - args[1].litval.integer;
                 break;
-            case F_DEC:
-                panic("TODO: assignment in operator");
             case F_MUL:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
@@ -105,12 +101,15 @@ eval(const enum type t, const struct expr* e,
                 lit.litval.integer =
                     args[0].litval.integer >= args[1].litval.integer;
                 break;
-            // special function tokens
             case F_LE:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
                     args[0].litval.integer <= args[1].litval.integer;
                 break;
+            // special function tokens
+            case F_INC:
+            case F_DEC:
+                panic("TODO: assignment in operator"); break;
             case F_QUI:
                 assert(e->e.func.exprs == 3);
                 if(args[0].litval.integer)
@@ -118,6 +117,8 @@ eval(const enum type t, const struct expr* e,
                 else
                     lit.litval.integer = args[2].litval.integer;
                 break;
+            case F_ASSGN:
+                panic("TODO: assignment in operator"); break;
             default:
                 fprintf(stderr, "%d: ", e->e.func.name.b);
                 panic("builtin not supported!\n");

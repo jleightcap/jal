@@ -153,9 +153,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
 
         // arithmetic
         case ADD: { e->e.func.name.b = F_ADD; goto builtin_binops; }
-        case INC: { e->e.func.name.b = F_INC; goto builtin_binops; }
         case SUB: { e->e.func.name.b = F_SUB; goto builtin_binops; }
-        case DEC: { e->e.func.name.b = F_DEC; goto builtin_binops; }
         case MUL: { e->e.func.name.b = F_MUL; goto builtin_binops; }
         case DIV: { e->e.func.name.b = F_DIV; goto builtin_binops; }
         case MOD: { e->e.func.name.b = F_MOD; goto builtin_binops; }

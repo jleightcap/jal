@@ -49,9 +49,7 @@ struct varenv {
 enum builtin {
     // arithmetic
     F_ADD,
-    F_INC,
     F_SUB,
-    F_DEC,
     F_MUL,
     F_DIV,
     F_MOD,
@@ -72,8 +70,10 @@ enum builtin {
     F_LE,
    
     // special function tokens
+    F_INC,
+    F_DEC,
     F_QUI,
-    F_ASSIGN,
+    F_ASSGN,
 
     // hashed symbols
     F_MAIN,

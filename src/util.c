@@ -48,23 +48,30 @@ void
 print_builtin(const enum builtin b)
 {
     switch(b) {
+    // arithmetic
     case F_ADD:   printf("'+'");   break;
     case F_SUB:   printf("'-'");   break;
     case F_MUL:   printf("'*'");   break;
     case F_DIV:   printf("'/'");   break;
     case F_MOD:   printf("mod");   break;
+    // binary operators
     case F_NOT:   printf("not");   break;
     case F_AND:   printf("and");   break;
     case F_OR:    printf("or");    break;
     case F_LSL:   printf("<<");    break;
     case F_LSR:   printf(">>");    break;
+    // comparators
     case F_EQ:    printf("==");    break;
     case F_NE:    printf("!=");    break;
     case F_GT:    printf(">");     break;
     case F_LT:    printf("<");     break;
     case F_GE:    printf(">=");    break;
     case F_LE:    printf("<=");    break;
+    // special function tokens
+    case F_INC:   printf("++");    break;
+    case F_DEC:   printf("--");    break;
     case F_QUI:   printf("?");     break;
+    case F_ASSGN: printf("=");     break;
     case F_MAIN:  printf("main");  break;
     case F_DEFUN: printf("defun"); break;
     case F_DEVAR: printf("devar"); break;
