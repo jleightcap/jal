@@ -151,11 +151,23 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             parse_quinary(e, fenv, venv);
             break;
 
+        // arithmetic
         case ADD: { e->e.func.name.b = F_ADD; goto builtin_binops; }
+        case INC: { e->e.func.name.b = F_INC; goto builtin_binops; }
         case SUB: { e->e.func.name.b = F_SUB; goto builtin_binops; }
+        case DEC: { e->e.func.name.b = F_DEC; goto builtin_binops; }
         case MUL: { e->e.func.name.b = F_MUL; goto builtin_binops; }
         case DIV: { e->e.func.name.b = F_DIV; goto builtin_binops; }
         case MOD: { e->e.func.name.b = F_MOD; goto builtin_binops; }
+
+        // binary operators
+        case NOT: { e->e.func.name.b = F_NOT; panic("uh this is unary"); }
+        case AND: { e->e.func.name.b = F_AND; goto builtin_binops; }
+        case OR:  { e->e.func.name.b = F_OR;  goto builtin_binops; }
+        case LSL: { e->e.func.name.b = F_LSL; goto builtin_binops; }
+        case LSR: { e->e.func.name.b = F_LSR; goto builtin_binops; }
+
+        // comparators
         case EQ:  { e->e.func.name.b = F_EQ;  goto builtin_binops; }
         case NE:  { e->e.func.name.b = F_NE;  goto builtin_binops; }
         case GT:  { e->e.func.name.b = F_GT;  goto builtin_binops; }
@@ -261,7 +273,7 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
 void
 parse_devar(struct funenv* fenv, struct varenv* venv)
 {
-    printf("parsing in venv %p\n", (void*)venv);
+    //printf("parsing in venv %p\n", (void*)venv);
     // VARIABLE SIGNATURE PARSING
     checktok((currtok = scan()), LPAREN, "variable signature begin");
     currtok = scan(); // variable name

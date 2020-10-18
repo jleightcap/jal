@@ -1,6 +1,6 @@
 (defun (main `int)
     (devar (sum `int) 0)
-    (for (devar (ii `int) 0) (ii < 10) (= i (+i 1))
+    (for (devar (ii `int) 0) (ii < 10) (= i (+ i 1))
         (= sum (+ sum ii))
     )
     (ret sum)

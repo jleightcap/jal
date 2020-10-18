@@ -23,16 +23,21 @@ eval(const enum type t, const struct expr* e,
             panic("can't eval function definitions!");
         case BUILTIN:
             switch(e->e.func.name.b) {
+            // arithmetic
             case F_ADD:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
                     args[0].litval.integer + args[1].litval.integer;
                 break;
+            case F_INC:
+                panic("TODO: assignment in operator");
             case F_SUB:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
                     args[0].litval.integer - args[1].litval.integer;
                 break;
+            case F_DEC:
+                panic("TODO: assignment in operator");
             case F_MUL:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
@@ -48,6 +53,7 @@ eval(const enum type t, const struct expr* e,
                 lit.litval.integer =
                     args[0].litval.integer % args[1].litval.integer;
                 break;
+            // binary operators
             case F_NOT:
                 assert(e->e.func.exprs == 1);
                 lit.litval.integer =
@@ -73,6 +79,7 @@ eval(const enum type t, const struct expr* e,
                 lit.litval.integer =
                     args[0].litval.integer >> args[1].litval.integer;
                 break;
+            // comparators
             case F_EQ:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
@@ -98,6 +105,7 @@ eval(const enum type t, const struct expr* e,
                 lit.litval.integer =
                     args[0].litval.integer >= args[1].litval.integer;
                 break;
+            // special function tokens
             case F_LE:
                 assert(e->e.func.exprs == 2);
                 lit.litval.integer =
@@ -139,6 +147,8 @@ eval(const enum type t, const struct expr* e,
                 {
                     assert(f.body[ii]->e.func.exprs == 1 && "expected 1 return expression!");
                     lit = eval(f.t, f.body[ii]->e.func.body[0], fenv, venv);
+                    printf("evaluated literal: ");
+                    print_lit(&lit, 0);
                 }
                 else {
                     // not 'return': the expression may change the environment,
