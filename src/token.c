@@ -169,10 +169,12 @@ scan()
               } fp++; return tok;
     case '+': switch(file[fp + 1]) {
               case '+': tok.type = INC; fp++; break;
+              case '=': tok.type = PEQ; fp++; break;
               default:  tok.type = ADD;       break;
               } fp++; return tok;
     case '-': switch(file[fp + 1]) {
               case '-': tok.type = DEC; fp++; break;
+              case '=': tok.type = MEQ; fp++; break;
               default:  tok.type = SUB;       break;
               } fp++; return tok;
     default: break;

@@ -5,8 +5,8 @@ OBJS    ?= $(SRCS:.c=.o)
 INCLUDE ?= ./include
 CFLAGS  ?= -D$(ARCH) \
 	   -std=c99 -I$(INCLUDE) \
-	  -Wall -Wextra -pedantic \
-	  -Wno-unused-parameter -Wno-type-limits
+	   -Wall -Wextra -pedantic \
+	   -Wno-unused-parameter -Wno-type-limits
 # release flags
 RFLAGS ?= -O3
 # debug flags

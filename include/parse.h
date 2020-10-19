@@ -70,10 +70,12 @@ enum builtin {
     F_LE,
    
     // special function tokens
-    F_INC,
-    F_DEC,
-    F_QUI,
     F_ASSGN,
+    F_INC,
+    F_PEQ,
+    F_DEC,
+    F_MEQ,
+    F_QUI,
 
     // hashed symbols
     F_MAIN,

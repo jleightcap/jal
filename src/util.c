@@ -68,10 +68,12 @@ print_builtin(const enum builtin b)
     case F_GE:    printf(">=");    break;
     case F_LE:    printf("<=");    break;
     // special function tokens
-    case F_INC:   printf("++");    break;
-    case F_DEC:   printf("--");    break;
-    case F_QUI:   printf("?");     break;
     case F_ASSGN: printf("=");     break;
+    case F_INC:   printf("++");    break;
+    case F_PEQ:   printf("+=");    break;
+    case F_DEC:   printf("--");    break;
+    case F_MEQ:   printf("-=");    break;
+    case F_QUI:   printf("?");     break;
     case F_MAIN:  printf("main");  break;
     case F_DEFUN: printf("defun"); break;
     case F_DEVAR: printf("devar"); break;

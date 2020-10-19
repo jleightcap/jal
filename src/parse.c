@@ -21,6 +21,7 @@ void parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_while(struct expr* e, struct funenv* fenv, struct  varenv* venv);
 void parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv);
 
@@ -158,16 +159,14 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             break;
 
         // assignment
-        case INC:
-            //printf("inc\n");
-            break;
-        case DEC:
-            //printf("inc\n");
-            break;
         case ASSIGN:
             //printf("assign\n");
             parse_assign(e, fenv, venv);
             break;
+        case INC: { e->e.func.name.b = F_INC; goto builtin_uniops; }
+        case PEQ: { e->e.func.name.b = F_PEQ; goto builtin_binops; }
+        case DEC: { e->e.func.name.b = F_DEC; goto builtin_uniops; }
+        case MEQ: { e->e.func.name.b = F_MEQ; goto builtin_binops; }
 
         // arithmetic
         case ADD: { e->e.func.name.b = F_ADD; goto builtin_binops; }
@@ -177,7 +176,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case MOD: { e->e.func.name.b = F_MOD; goto builtin_binops; }
 
         // binary operators
-        case NOT: { e->e.func.name.b = F_NOT; panic("uh this is unary"); }
+        case NOT: { e->e.func.name.b = F_NOT; goto builtin_uniops; }
         case AND: { e->e.func.name.b = F_AND; goto builtin_binops; }
         case OR:  { e->e.func.name.b = F_OR;  goto builtin_binops; }
         case LSL: { e->e.func.name.b = F_LSL; goto builtin_binops; }
@@ -190,6 +189,14 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case LT:  { e->e.func.name.b = F_LT;  goto builtin_binops; }
         case GE:  { e->e.func.name.b = F_GE;  goto builtin_binops; }
         case LE:  { e->e.func.name.b = F_LE;  goto builtin_binops; }
+
+        // unary operators: (operator [EXPR]1)
+        builtin_uniops:
+            //printf("uniop\n");
+            parse_uniop(e, fenv, venv);
+            break;
+
+        // binary operators: (operator [EXPR]1 [EXPR]2)
         builtin_binops:
             //printf("binop\n");
             parse_binop(e, fenv, venv);
@@ -333,8 +340,8 @@ parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.t = VOID;
     e->e.func.ft = BUILTIN;
+    e->e.func.t = VOID;
     e->e.func.name.b = F_PRINT;
     e->e.func.argnum = 1;
     e->e.func.exprs = 1;
@@ -385,8 +392,8 @@ parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.t = VOID;
     e->e.func.ft = BUILTIN;
+    e->e.func.t = VOID;
     e->e.func.name.b = F_WHILE;
     e->e.func.argnum = 1;
     e->e.func.exprs = 1;
@@ -413,8 +420,8 @@ parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.t = VOID;
     e->e.func.ft = BUILTIN;
+    e->e.func.t = VOID;
     e->e.func.name.b = F_ASSGN;
     e->e.func.exprs = 2;
     e->e.func.argnum = 2;
@@ -429,14 +436,32 @@ parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
     currtok = scan();
 }
 
+// parse a builtin unary expression
+// parsing begins with currtok pointing to token after uniop
+// parsing ends with currtok pointing to ')' matching '(' before uniop
+void
+parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv)
+{
+    e->e.func.ft = BUILTIN;
+    e->e.func.t = INT;
+    e->e.func.argnum = 1;
+    e->e.func.exprs = 1;
+    e->e.func.args.argt[0] = INT;
+
+    // expressions
+    currtok = scan(); // begin argument
+    parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
+    currtok = scan();
+}
+
 // parse a builtin binary expression
 // parsing begins with currtok pointing to token after binop
 // parsing ends with currtok pointing to ')' matching '(' before binop
 void
 parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.t = INT;
     e->e.func.ft = BUILTIN;
+    e->e.func.t = INT;
     e->e.func.argnum = 2;
     e->e.func.exprs = 2;
     e->e.func.args.argt[0] = INT;
@@ -455,6 +480,7 @@ void
 parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
     e->e.func.ft = CALL;
+    e->e.func.t = fenv->env[currtok.value.hash].t;
     e->e.func.name.hash = fenv->env[currtok.value.hash].name.hash;
     e->e.func.argnum = fenv->env[currtok.value.hash].argnum;
     e->e.func.exprs = fenv->env[currtok.value.hash].exprs;

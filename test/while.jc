@@ -2,7 +2,7 @@
     (devar (ii `int) 0)
     (while (< ii 10)
         (print "around we go")
-        (= ii (+ ii 1))
+        (++ ii)
     )
     (ret ii)
 )

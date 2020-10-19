@@ -44,19 +44,23 @@ enum toktype {
 
     // operators
     ADD,                // (+ a b)
-    INC,                // (++ a)
     SUB,                // (- a b)
-    DEC,                // (-- a)
     MUL,                // (* a b)
     DIV,                // (/ a b)
     MOD,                // (% a b)
     LSL,                // (<< a b)
     LSR,                // (>> a b)
-    ASSIGN,             // (= a b)
     NOT,                // (! a)
     AND,                // (& a b)
     OR,                 // (| a b)
     QUINARY,            // (? cond resl cons)
+
+    // assignment
+    ASSIGN,             // (= a b)
+    INC,                // (++ a)
+    PEQ,                // (+= a b)
+    DEC,                // (-- a)
+    MEQ,                // (-= a b)
 
     // binary comparators
     EQ,                 // (== a b)
