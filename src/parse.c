@@ -404,7 +404,10 @@ parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
         e->e.func.argnum++;
         checktok(currtok, RPAREN, "while body expression end");
     }
-    printf("%d while body expressions\n", e->e.func.argnum - 1);
+    e->e.func.args.argt[0] = INT;
+    for(unsigned int ii = 0; ii < e->e.func.argnum; ii++) {
+        e->e.func.args.argt[ii] = expr_to_type(e->e.func.body[ii]);
+    }
 }
 
 // parse an assign expression
