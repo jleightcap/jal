@@ -134,7 +134,6 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case DEVAR:
             //printf("devar\n");
             // parsing devar is also done at top level, so add metadata here
-            e->exprtype = FUNCTION;
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_DEVAR;
             e->e.func.exprs = 0;
@@ -353,7 +352,6 @@ void
 parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
     // TODO: the consequence branch should be optional!
-    e->exprtype = FUNCTION;
     e->e.func.ft = BUILTIN;
     e->e.func.name.b = F_QUI;
     e->e.func.exprs = 3;
@@ -387,7 +385,6 @@ parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->exprtype = FUNCTION;
     e->e.func.t = VOID;
     e->e.func.ft = BUILTIN;
     e->e.func.name.b = F_WHILE;
@@ -416,7 +413,6 @@ parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->exprtype = FUNCTION;
     e->e.func.t = VOID;
     e->e.func.ft = BUILTIN;
     e->e.func.name.b = F_ASSGN;
@@ -439,7 +435,6 @@ parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->exprtype = FUNCTION;
     e->e.func.t = INT;
     e->e.func.ft = BUILTIN;
     e->e.func.argnum = 2;
@@ -459,7 +454,6 @@ parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->exprtype = FUNCTION;
     e->e.func.ft = CALL;
     e->e.func.name.hash = fenv->env[currtok.value.hash].name.hash;
     e->e.func.argnum = fenv->env[currtok.value.hash].argnum;

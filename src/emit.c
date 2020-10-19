@@ -13,15 +13,12 @@ void
 emit(FILE* f, const struct funenv* fenv, const struct varenv* venv)
 {
 #ifdef _RISCV_64
-    emit_riscv64(f, fenv, venv); goto done;
-#endif
+    emit_riscv64(f, fenv, venv);
+#else
 #ifdef _6502
-    emit_6502(f, fenv, venv); goto done;
-#endif
-
-    // really hacky #ifdef chain means I have to hop over this panic
+    emit_6502(f, fenv, venv);
+#else
     panic("Must define a supported architecture with -DARCH!\n");
-
-    done:
-    return;
+#endif
+#endif
 }
