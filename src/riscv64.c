@@ -7,11 +7,11 @@
 #include "parse.h"
 #include "util.h"
 
-FILE* out;
+FILE* riscv64_out;
 
-#define emit(str) fputs(str, out)
+#define emit(str) fputs(str, riscv64_out)
 
-struct riscv64_reg_state reg_state;
+struct riscv64_reg_state riscv64_reg_state;
 
 // emit an available temporary register (t0-t6)
 void
@@ -21,21 +21,21 @@ emit_tmp(void)
     // (t0 - t2) and (t3 - t6)
     // DEPENDS: order of registers in enum riscv64_regs (riscv64.h)
     for(int tmp = T0; tmp <= T2; tmp++) {
-        if(!reg_state.reg[tmp]) {
+        if(!riscv64_reg_state.reg[tmp]) {
             switch(tmp) {
-            case T0: emit("t0"); reg_state.reg[T0] = true; break;
-            case T1: emit("t1"); reg_state.reg[T1] = true; break;
-            case T2: emit("t2"); reg_state.reg[T2] = true; break;
+            case T0: emit("t0"); riscv64_reg_state.reg[T0] = true; break;
+            case T1: emit("t1"); riscv64_reg_state.reg[T1] = true; break;
+            case T2: emit("t2"); riscv64_reg_state.reg[T2] = true; break;
             }
             return;
         }
     }
     for(int tmp = T3; tmp <= T6; tmp++) {
-        if(!reg_state.reg[tmp]) {
+        if(!riscv64_reg_state.reg[tmp]) {
             switch(tmp) {
-            case T3: emit("t3"); reg_state.reg[T3] = true; break;
-            case T4: emit("t4"); reg_state.reg[T4] = true; break;
-            case T5: emit("t5"); reg_state.reg[T5] = true; break;
+            case T3: emit("t3"); riscv64_reg_state.reg[T3] = true; break;
+            case T4: emit("t4"); riscv64_reg_state.reg[T4] = true; break;
+            case T5: emit("t5"); riscv64_reg_state.reg[T5] = true; break;
             }
             return;
         }

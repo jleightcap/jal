@@ -1,4 +1,4 @@
-ARCH    ?= RISCV_64
+ARCH    ?= _6502
 BIN     ?= jal
 SRCS    ?= $(wildcard src/*.c)
 OBJS    ?= $(SRCS:.c=.o)
