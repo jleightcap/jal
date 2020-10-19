@@ -19,6 +19,8 @@ void parse_devar(struct funenv* fenv, struct varenv* venv);
 void parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_while(struct expr* e, struct funenv* fenv, struct  varenv* venv);
+void parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv);
 void parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv);
 
@@ -131,6 +133,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             panic("function definitions only at top level!");
         case DEVAR:
             //printf("devar\n");
+            // parsing devar is also done at top level, so add metadata here
             e->exprtype = FUNCTION;
             e->e.func.ft = BUILTIN;
             e->e.func.name.b = F_DEVAR;
@@ -138,7 +141,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             e->e.func.argnum = 0;
             parse_devar(fenv, venv);
             break;
-        case RET: // define the builtin 'ret' function
+        case RET:
             //printf("ret\n");
             parse_ret(e, fenv, venv);
             break;
@@ -149,6 +152,22 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case QUINARY:
             //printf("quinary\n");
             parse_quinary(e, fenv, venv);
+            break;
+        case WHILE:
+            //printf("while\n");
+            parse_while(e, fenv, venv);
+            break;
+
+        // assignment
+        case INC:
+            //printf("inc\n");
+            break;
+        case DEC:
+            //printf("inc\n");
+            break;
+        case ASSIGN:
+            //printf("assign\n");
+            parse_assign(e, fenv, venv);
             break;
 
         // arithmetic
@@ -297,17 +316,16 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
 void
 parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    // arguments
-    e->e.func.argnum = 1; e->e.func.args.argt[0] = INT;
-    // expressions
+    e->e.func.ft = BUILTIN;
+    e->e.func.t = VOID;
+    e->e.func.name.b = F_RET;
+    e->e.func.argnum = 1;
     e->e.func.exprs = 1;
+    e->e.func.args.argt[0] = INT;
+
     currtok = scan();
     parse_expr(e->e.func.body[0] = expr_init(), fenv, venv);
     checktok((currtok = scan()), RPAREN, "return end");
-    // metadata
-    e->e.func.t = VOID;
-    e->e.func.ft = BUILTIN;
-    e->e.func.name.b = F_RET;
 }
 
 // parse a print expression
@@ -316,17 +334,16 @@ parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    // arguments
-    e->e.func.argnum = 1; e->e.func.args.argt[0] = STRING;
-    // expressions
-    e->e.func.exprs = 1;
-    currtok = scan();
-    parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
-    currtok = scan();
-    // metadata
     e->e.func.t = VOID;
     e->e.func.ft = BUILTIN;
     e->e.func.name.b = F_PRINT;
+    e->e.func.argnum = 1;
+    e->e.func.exprs = 1;
+    e->e.func.args.argt[0] = STRING;
+
+    currtok = scan();
+    parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
+    currtok = scan();
 }
 
 // parse a quinary expression
@@ -336,13 +353,16 @@ void
 parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
     // TODO: the consequence branch should be optional!
-    // expressions
+    e->exprtype = FUNCTION;
+    e->e.func.ft = BUILTIN;
+    e->e.func.name.b = F_QUI;
     e->e.func.exprs = 3;
+    e->e.func.argnum = 3;
+
     struct expr* cond = (e->e.func.body[0] = expr_init());
     struct expr* resl = (e->e.func.body[1] = expr_init());
     struct expr* cons = (e->e.func.body[2] = expr_init());
     checktok((currtok = scan()), LPAREN, "quinary cond beginning");
-    checktok(currtok, LPAREN, "quinary cond expression begin");
     parse_expr(cond, fenv, venv);
     currtok = scan(); // first token of result expression
     parse_expr(resl, fenv, venv);
@@ -353,14 +373,61 @@ parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
     enum type t_resl = expr_to_type(resl);
     enum type t_cons = expr_to_type(cons);
     assert(t_resl  == t_cons &&  "result and consequence must have same type!");
+    
     // metadata
     e->e.func.t = t_resl; // quinary return type is type branches
-    e->e.func.argnum = 3;
     e->e.func.args.argt[0] = INT;
     e->e.func.args.argt[1] = t_resl;
     e->e.func.args.argt[2] = t_cons;
+}
+
+// parse a 'while' expression
+// parsing begins with currtok pointing to '(' after 'while' token
+// parsing ends with currtok pointint to ')' matching '(' before 'while' token
+void
+parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
+{
+    e->exprtype = FUNCTION;
+    e->e.func.t = VOID;
     e->e.func.ft = BUILTIN;
-    e->e.func.name.b = F_QUI;
+    e->e.func.name.b = F_WHILE;
+    e->e.func.argnum = 1;
+    e->e.func.exprs = 1;
+
+    currtok = scan();
+    parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
+
+    for(currtok = scan(); currtok.type == LPAREN; currtok = scan()) {
+        unsigned int ii = e->e.func.exprs;
+        parse_expr((e->e.func.body[ii] = expr_init()), fenv, venv);
+        e->e.func.exprs++;
+        e->e.func.argnum++;
+        checktok(currtok, RPAREN, "while body expression end");
+    }
+    printf("%d while body expressions\n", e->e.func.argnum - 1);
+}
+
+// parse an assign expression
+// parsing begins with currtok pointing to token after operator
+// parsing ends with currtok pointing to ')' matching '(' before operator
+void
+parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
+{
+    e->exprtype = FUNCTION;
+    e->e.func.t = VOID;
+    e->e.func.ft = BUILTIN;
+    e->e.func.name.b = F_ASSGN;
+    e->e.func.exprs = 2;
+    e->e.func.argnum = 2;
+
+    currtok = scan();
+    struct expr* var = (e->e.func.body[0] = expr_init());
+    parse_expr(var, fenv, venv);
+    assert(var->exprtype == VARIABLE && "assignment must operating on variable!");
+    currtok = scan();
+    struct expr* new = (e->e.func.body[1] = expr_init());
+    parse_expr(new, fenv, venv);
+    currtok = scan();
 }
 
 // parse a builtin binary expression
@@ -369,32 +436,35 @@ parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    // arguments
+    e->exprtype = FUNCTION;
+    e->e.func.t = INT;
+    e->e.func.ft = BUILTIN;
     e->e.func.argnum = 2;
+    e->e.func.exprs = 2;
     e->e.func.args.argt[0] = INT;
     e->e.func.args.argt[1] = INT;
+
     // expressions
-    e->e.func.exprs = 2;
     currtok = scan(); // begin first argument
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
     currtok = scan(); // begin second argument
     parse_expr((e->e.func.body[1] = expr_init()), fenv, venv);
     currtok = scan();
-    // metadata
-    e->e.func.t = INT;
-    e->e.func.ft = BUILTIN;
 }
 
 // parse a function call symbol in the given environments
 void
 parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
+    e->exprtype = FUNCTION;
     e->e.func.ft = CALL;
-    assert(fenv->env[currtok.value.hash].body[0] != NULL
-           && "calling an undefined function!");
     e->e.func.name.hash = fenv->env[currtok.value.hash].name.hash;
     e->e.func.argnum = fenv->env[currtok.value.hash].argnum;
     e->e.func.exprs = fenv->env[currtok.value.hash].exprs;
+
+    assert(fenv->env[currtok.value.hash].body[0] != NULL
+           && "calling an undefined function!");
+
     currtok = scan();
     for(unsigned int ii = 0; ii < e->e.func.argnum; ii++) {
         assert(currtok.type != RPAREN && "expected another argument!");

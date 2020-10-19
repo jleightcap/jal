@@ -1,5 +1,5 @@
 (defun (f `int (x `int) (y `int))
-    (ret (<< x y)) # exciting
+    (ret (+ x y)) # exciting
 )
 (devar (x `int) 2)
 (defun (main `int)
