@@ -29,6 +29,6 @@ struct _6502_reg_state {
 // =========================================================================  //
 
 void
-emit_6502(FILE* f, const struct funenv* fenv, const struct varenv* venv);
+emit_6502(FILE* f, struct funenv const* fenv, struct varenv const* venv);
 
 #endif

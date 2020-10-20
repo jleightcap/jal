@@ -8,9 +8,8 @@
 #include "token.h"
 #include "util.h"
 
-struct token currtok;
-
-unsigned int exprcount = 0;
+static struct token currtok;
+static unsigned int exprcount = 0;
 
 // parse function signatures
 void parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv);

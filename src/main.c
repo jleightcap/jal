@@ -43,10 +43,8 @@ main(int ac, char** av) {
 
     parse(fenv, venv);
 
-    print_fenv(fenv);
-
     // emit assembly from 'main' expression tree entrypoint
-    //emit(outf, &fenv, &venv);
+    emit(outf, fenv, venv);
 
     funenv_free(fenv);
     varenv_free(venv);

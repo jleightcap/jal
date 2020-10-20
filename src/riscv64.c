@@ -7,14 +7,14 @@
 #include "parse.h"
 #include "util.h"
 
-FILE* riscv64_out;
-
 #define emit(str) fputs(str, riscv64_out)
 
-struct riscv64_reg_state riscv64_reg_state;
+static FILE* riscv64_out;
+static struct riscv64_reg_state riscv64_reg_state;
 
 // emit an available temporary register (t0-t6)
-void
+/*
+static void
 emit_tmp(void)
 {
     // temporary registers are disjoint, loop over each set
@@ -42,11 +42,12 @@ emit_tmp(void)
     }
     fprintf(stderr, "temporary registers full!\n"); exit(-1);
 }
+*/
 
-void
+/*
+static void
 emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* venv)
 {
-    /*
     char strbuf[100];
     switch(e->exptype) {
     case BINARY:
@@ -82,16 +83,16 @@ emit_expr(const struct expr* e, const struct funenv* fenv, const struct varenv* 
     default:
         fprintf(stderr, "TODO!\n"); exit(-1);
     }
-    */
 }
+*/
 
 void
 emit_riscv64(FILE* f, const struct funenv* fenv, const struct varenv* venv)
 {
+    riscv64_out = f;
+    memset(&riscv64_reg_state.reg, 0, sizeof(struct riscv64_reg_state));
+
     /*
-    out = f;
-    unsigned long main = hashstr("main");
-    memset(&reg_state.reg, 0, sizeof(struct riscv64_reg_state));
     
     emit("\t.globl _start\n");
     emit("_start:\n");

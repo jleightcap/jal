@@ -7,7 +7,7 @@
 
 static int fp = 0;              // file position
 static const char* file = NULL; // global FILE for tokenizing
-int len = 0;                    // global FILE length
+static int len = 0;             // global FILE length
 
 void
 setstream(const char stream[], int streamlen)
