@@ -1,4 +1,4 @@
-ARCH    ?= _6502
+ARCH    ?= _Z80
 BIN     ?= jal
 SRCS    ?= $(wildcard src/*.c)
 OBJS    ?= $(SRCS:.c=.o)

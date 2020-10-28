@@ -3,19 +3,19 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "6502.h"
+#include "z80.h"
 #include "eval.h"
 #include "parse.h"
 #include "util.h"
 
-#define emit(str) fputs(str, _6502_out)
+#define emit(str) fputs(str, _z80_out)
 #define RAMSIZE 0x3fff - 0x000
 
 typedef uint8_t word; // architecture word size
 
-static word* _6502_ram;
-static FILE* _6502_out;
-static struct _6502_reg_state* _6502_reg_state;
+static word* _z80_ram;
+static FILE* _z80_out;
+static struct _z80_reg_state* _z80_reg_state;
 
 static void emit_expr(struct expr const* e,
                       struct varenv const* venv, struct funenv const* fenv);
@@ -53,7 +53,7 @@ emit_lit(struct lit const* l, struct varenv const* venv, struct funenv const* fe
     switch(l->t) {
         case INT:
             sprintf(numbuf, "%x", l->litval.integer);
-            emit("\tlda #$");
+            emit("\tld, A $");
             emit(numbuf);
             emit("\n");
             break;
@@ -71,20 +71,18 @@ emit_var(struct var const* v, struct varenv const* venv, struct funenv const* fe
 }
 
 void
-emit_6502(FILE* f, struct funenv const* fenv, struct varenv const* venv)
+emit_z80(FILE* f, struct funenv const* fenv, struct varenv const* venv)
 {
-    _6502_out = f;
-    _6502_reg_state = calloc(1, sizeof(struct _6502_reg_state));
-    _6502_ram = calloc(RAMSIZE, sizeof(word));
-
-    emit("\torg $8000\n"); // assemble to ROM
+    _z80_out = f;
+    _z80_reg_state = calloc(1, sizeof(struct _z80_reg_state));
+    _z80_ram = calloc(RAMSIZE, sizeof(word));
 
     // entrypoint
-    emit("\nstart:\n");
+    emit("start:\n");
     const unsigned long main = hashstr("main");
     emit_func(&fenv->env[main], venv, fenv);
-    emit("\tbrk\n");
+    emit("\thalt\n");
 
-    free(_6502_ram);
-    free(_6502_reg_state);
+    free(_z80_ram);
+    free(_z80_reg_state);
 }
