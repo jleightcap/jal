@@ -262,10 +262,14 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             break;
 
         // symbol preceded by LPAREN must be a function reference
-        case SYM:
+        case SYM: {
             //printf("func call\n");
+            struct func* f = &fenv->env[currtok.value.hash];
+            func_init(&e->e.func, f->t, CALL,
+                      f->name.hash, 0, f->argnum, f->exprs, venv);
             parse_call(e, fenv, venv);
             break;
+            }
         default:
             panic("unexpected function!");
         }
@@ -493,12 +497,6 @@ parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.ft = CALL;
-    e->e.func.t = fenv->env[currtok.value.hash].t;
-    e->e.func.name.hash = fenv->env[currtok.value.hash].name.hash;
-    e->e.func.argnum = fenv->env[currtok.value.hash].argnum;
-    e->e.func.exprs = fenv->env[currtok.value.hash].exprs;
-
     assert(fenv->env[currtok.value.hash].body[0] != NULL
            && "calling an undefined function!");
 
