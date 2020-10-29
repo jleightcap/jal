@@ -11,25 +11,42 @@
 static struct token currtok;
 static unsigned int exprcount = 0;
 
-// parse function signatures
-void parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_defun(struct funenv* fenv, struct varenv* venv);
-void parse_devar(struct funenv* fenv, struct varenv* venv);
-void parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_while(struct expr* e, struct funenv* fenv, struct  varenv* venv);
-void parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv);
-
 struct expr*
 expr_init(void)
 {
     exprcount++;
     //printf("exprinit %d\n", exprcount);
     return malloc(sizeof(struct expr));
+}
+
+// initialize function metadata (everything but body)
+// because of tagged unions, seems like the safest way to initialize all func
+// cases is just pass every possible parameter? gcc has `transparent_union` but
+// want this to be compiler agnostic.
+void
+func_init(struct func* f, const enum type t, const enum ftype ft,
+          const unsigned long hash, const enum builtin b,
+          const unsigned int argnum, const unsigned int exprs,
+          const struct varenv* parent_venv)
+{
+    f->t = t;
+    f->ft = ft;
+    f->argnum = argnum;
+    f->exprs = exprs;
+    switch(f->ft) {
+    case DEF:
+        f->name.hash = hash;
+        // function definitions inheret the upper variable environment
+        f->venv = malloc(sizeof(struct varenv));
+        memcpy(f->venv, parent_venv, sizeof(struct varenv));
+        break;
+    case BUILTIN:
+        f->name.b = b;
+        break;
+    case CALL:
+        f->name.hash = hash;
+        break;
+    }
 }
 
 void
@@ -134,32 +151,35 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case DEVAR:
             //printf("devar\n");
             // parsing devar is also done at top level, so add metadata here
-            e->e.func.ft = BUILTIN;
-            e->e.func.name.b = F_DEVAR;
-            e->e.func.exprs = 0;
-            e->e.func.argnum = 0;
+            func_init(&e->e.func, VOID, BUILTIN, 0, F_DEVAR, 0, 0, venv);
             parse_devar(fenv, venv);
             break;
         case RET:
             //printf("ret\n");
+            func_init(&e->e.func, VOID, BUILTIN, 0, F_RET, 1, 1, venv);
             parse_ret(e, fenv, venv);
             break;
         case PRINT:
             //printf("print\n");
+            func_init(&e->e.func, VOID, BUILTIN, 0, F_PRINT, 1, 1, venv);
             parse_print(e, fenv, venv);
             break;
         case QUINARY:
             //printf("quinary\n");
+            // TODO: the consequence branch should be optional!
+            func_init(&e->e.func, VOID, BUILTIN, 0, F_QUI, 3, 3, venv);
             parse_quinary(e, fenv, venv);
             break;
         case WHILE:
             //printf("while\n");
+            func_init(&e->e.func, VOID, BUILTIN, 0, F_WHILE, 1, 1, venv);
             parse_while(e, fenv, venv);
             break;
 
-        // assignment
+        // functions that assign
         case ASSIGN:
             //printf("assign\n");
+            func_init(&e->e.func, VOID, BUILTIN, 0, F_ASSGN, 2, 2, venv);
             parse_assign(e, fenv, venv);
             break;
         case INC: { e->e.func.name.b = F_INC; goto builtin_uniops; }
@@ -321,13 +341,6 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
 void
 parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.ft = BUILTIN;
-    e->e.func.t = VOID;
-    e->e.func.name.b = F_RET;
-    e->e.func.argnum = 1;
-    e->e.func.exprs = 1;
-    e->e.func.args.argt[0] = INT;
-
     currtok = scan();
     parse_expr(e->e.func.body[0] = expr_init(), fenv, venv);
     checktok((currtok = scan()), RPAREN, "return end");
@@ -339,13 +352,6 @@ parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.ft = BUILTIN;
-    e->e.func.t = VOID;
-    e->e.func.name.b = F_PRINT;
-    e->e.func.argnum = 1;
-    e->e.func.exprs = 1;
-    e->e.func.args.argt[0] = STRING;
-
     currtok = scan();
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
     currtok = scan();
@@ -357,12 +363,6 @@ parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    // TODO: the consequence branch should be optional!
-    e->e.func.ft = BUILTIN;
-    e->e.func.name.b = F_QUI;
-    e->e.func.exprs = 3;
-    e->e.func.argnum = 3;
-
     struct expr* cond = (e->e.func.body[0] = expr_init());
     struct expr* resl = (e->e.func.body[1] = expr_init());
     struct expr* cons = (e->e.func.body[2] = expr_init());
@@ -391,12 +391,6 @@ parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.ft = BUILTIN;
-    e->e.func.t = VOID;
-    e->e.func.name.b = F_WHILE;
-    e->e.func.argnum = 1;
-    e->e.func.exprs = 1;
-
     currtok = scan();
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
 
@@ -419,12 +413,6 @@ parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.ft = BUILTIN;
-    e->e.func.t = VOID;
-    e->e.func.name.b = F_ASSGN;
-    e->e.func.exprs = 2;
-    e->e.func.argnum = 2;
-
     currtok = scan();
     struct expr* var = (e->e.func.body[0] = expr_init());
     parse_expr(var, fenv, venv);

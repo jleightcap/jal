@@ -149,6 +149,12 @@ struct expr*
 expr_init(void);
 
 void
+func_init(struct func* f, const enum type t, const enum ftype ft,
+          const unsigned long hash, const enum builtin b,
+          const unsigned int argnum, const unsigned int exprs,
+          const struct varenv* parent_venv);
+
+void
 expr_free(struct expr* e);
 
 // free environments (collection of expressions)
@@ -165,15 +171,17 @@ typetok_to_type(const enum toktype t);
 void
 parse(struct funenv* fenv, struct varenv* venv);
 
-/*
-parse_expr
-parse_defun
-parse_devar
-parse_ret
-parse_print
-parse_quinary
-parse_binop
-parse_sym
-*/
+// parse function signatures
+void parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_defun(struct funenv* fenv, struct varenv* venv);
+void parse_devar(struct funenv* fenv, struct varenv* venv);
+void parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_while(struct expr* e, struct funenv* fenv, struct  varenv* venv);
+void parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv);
 
 #endif
