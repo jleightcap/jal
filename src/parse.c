@@ -182,32 +182,72 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             func_init(&e->e.func, VOID, BUILTIN, 0, F_ASSGN, 2, 2, venv);
             parse_assign(e, fenv, venv);
             break;
-        case INC: { e->e.func.name.b = F_INC; goto builtin_uniops; }
-        case PEQ: { e->e.func.name.b = F_PEQ; goto builtin_binops; }
-        case DEC: { e->e.func.name.b = F_DEC; goto builtin_uniops; }
-        case MEQ: { e->e.func.name.b = F_MEQ; goto builtin_binops; }
+        case INC:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_INC, 1, 1, venv);
+            goto builtin_uniops;
+        case PEQ:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_PEQ, 2, 2, venv);
+            goto builtin_binops;
+        case DEC:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_DEC, 1, 1, venv);
+            goto builtin_uniops;
+        case MEQ:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_MEQ, 2, 2, venv);
+            goto builtin_binops;
 
         // arithmetic
-        case ADD: { e->e.func.name.b = F_ADD; goto builtin_binops; }
-        case SUB: { e->e.func.name.b = F_SUB; goto builtin_binops; }
-        case MUL: { e->e.func.name.b = F_MUL; goto builtin_binops; }
-        case DIV: { e->e.func.name.b = F_DIV; goto builtin_binops; }
-        case MOD: { e->e.func.name.b = F_MOD; goto builtin_binops; }
+        case ADD:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_ADD, 2, 2, venv);
+            goto builtin_binops;
+        case SUB:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_SUB, 2, 2, venv);
+            goto builtin_binops;
+        case MUL:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_MUL, 2, 2, venv);
+            goto builtin_binops;
+        case DIV:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_DIV, 2, 2, venv);
+            goto builtin_binops;
+        case MOD:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_MOD, 2, 2, venv);
+            goto builtin_binops;
 
         // binary operators
-        case NOT: { e->e.func.name.b = F_NOT; goto builtin_uniops; }
-        case AND: { e->e.func.name.b = F_AND; goto builtin_binops; }
-        case OR:  { e->e.func.name.b = F_OR;  goto builtin_binops; }
-        case LSL: { e->e.func.name.b = F_LSL; goto builtin_binops; }
-        case LSR: { e->e.func.name.b = F_LSR; goto builtin_binops; }
+        case NOT:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_NOT, 1, 1, venv);
+            goto builtin_binops;
+        case AND:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_AND, 2, 2, venv);
+            goto builtin_binops;
+        case OR:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_OR, 2, 2, venv);
+            goto builtin_binops;
+        case LSL:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_LSL, 2, 2, venv);
+            goto builtin_binops;
+        case LSR:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_LSR, 2, 2, venv);
+            goto builtin_binops;
 
         // comparators
-        case EQ:  { e->e.func.name.b = F_EQ;  goto builtin_binops; }
-        case NE:  { e->e.func.name.b = F_NE;  goto builtin_binops; }
-        case GT:  { e->e.func.name.b = F_GT;  goto builtin_binops; }
-        case LT:  { e->e.func.name.b = F_LT;  goto builtin_binops; }
-        case GE:  { e->e.func.name.b = F_GE;  goto builtin_binops; }
-        case LE:  { e->e.func.name.b = F_LE;  goto builtin_binops; }
+        case EQ:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_EQ, 2, 2, venv);
+            goto builtin_binops;
+        case NE:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_NE, 2, 2, venv);
+            goto builtin_binops;
+        case GT:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_GT, 2, 2, venv);
+            goto builtin_binops;
+        case LT:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_LT, 2, 2, venv);
+            goto builtin_binops;
+        case GE:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_GE, 2, 2, venv);
+            goto builtin_binops;
+        case LE:
+            func_init(&e->e.func, INT, BUILTIN, 0, F_LE, 2, 2, venv);
+            goto builtin_binops;
 
         // unary operators: (operator [EXPR]1)
         builtin_uniops:
@@ -429,12 +469,6 @@ parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.ft = BUILTIN;
-    e->e.func.t = INT;
-    e->e.func.argnum = 1;
-    e->e.func.exprs = 1;
-    e->e.func.args.argt[0] = INT;
-
     // expressions
     currtok = scan(); // begin argument
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
@@ -447,13 +481,6 @@ parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    e->e.func.ft = BUILTIN;
-    e->e.func.t = INT;
-    e->e.func.argnum = 2;
-    e->e.func.exprs = 2;
-    e->e.func.args.argt[0] = INT;
-    e->e.func.args.argt[1] = INT;
-
     // expressions
     currtok = scan(); // begin first argument
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
