@@ -40,4 +40,4 @@ memtest: $(BIN)
 clean:
 	rm -f src/*.o *.bin test/*.bin ./*.s $(BIN) $(VALGRIND)*
 
-.PHONY: clean
+.PHONY: memtest clean

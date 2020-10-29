@@ -220,7 +220,7 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             func_init(&e->e.func, INT, BUILTIN, 0, F_AND, 2, 2, venv);
             goto builtin_binops;
         case OR:
-            func_init(&e->e.func, INT, BUILTIN, 0, F_OR, 2, 2, venv);
+            func_init(&e->e.func, INT, BUILTIN, 0, F_OR,  2, 2, venv);
             goto builtin_binops;
         case LSL:
             func_init(&e->e.func, INT, BUILTIN, 0, F_LSL, 2, 2, venv);
@@ -435,9 +435,11 @@ parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    currtok = scan();
+    currtok = scan(); // conditional expression
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
+    e->e.func.args.argt[0] = INT;
 
+    // while expression loop body
     for(currtok = scan(); currtok.type == LPAREN; currtok = scan()) {
         unsigned int ii = e->e.func.exprs;
         parse_expr((e->e.func.body[ii] = expr_init()), fenv, venv);
@@ -445,7 +447,8 @@ parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
         e->e.func.argnum++;
         checktok(currtok, RPAREN, "while body expression end");
     }
-    e->e.func.args.argt[0] = INT;
+    // don't actually check if the while expression body contains expressions!
+    // a while loop can have an empty body.
     for(unsigned int ii = 0; ii < e->e.func.argnum; ii++) {
         e->e.func.args.argt[ii] = expr_to_type(e->e.func.body[ii]);
     }
@@ -457,10 +460,12 @@ parse_while(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
+    // the variable to be assigned to
     currtok = scan();
     struct expr* var = (e->e.func.body[0] = expr_init());
     parse_expr(var, fenv, venv);
     assert(var->exprtype == VARIABLE && "assignment must operating on variable!");
+    // the expression to be assigned
     currtok = scan();
     struct expr* new = (e->e.func.body[1] = expr_init());
     parse_expr(new, fenv, venv);
@@ -473,8 +478,8 @@ parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    // expressions
-    currtok = scan(); // begin argument
+    // the one expression in the function body
+    currtok = scan();
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
     currtok = scan();
 }
@@ -485,7 +490,7 @@ parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 void
 parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv)
 {
-    // expressions
+    // the two expression in the function body
     currtok = scan(); // begin first argument
     parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
     currtok = scan(); // begin second argument
