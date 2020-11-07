@@ -1,4 +1,0 @@
-(defun (main `int)
-    (devar (x `int) 2)
-    (ret x)
-)

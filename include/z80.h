@@ -3,28 +3,32 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "parse.h"
 
 // =========================================================================  //
 //                                                                            //
-// 6502 DEFINITIONS                                                           //
+// Z80 DEFINITIONS                                                            //
 //                                                                            //
 // =========================================================================  //
 
-enum _z80_regs {
-    A, X, Y
-};
-
-struct _z80_reg_state {
-    // register states indexed with riscv64_regs
-    bool reg[3];
+struct _z80_reg {
+    uint8_t  A;
+    uint8_t  F;
+    uint8_t  B;
+    uint8_t  C;
+    uint8_t  D;
+    uint8_t  E;
+    uint16_t IX;
+    uint16_t IY;
+    uint16_t SP;
 };
 
 
 // =========================================================================  //
 //                                                                            //
-// 6502 FUNCTIONS                                                             //
+// Z80 FUNCTIONS                                                              //
 //                                                                            //
 // =========================================================================  //
 

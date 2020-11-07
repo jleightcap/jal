@@ -1,5 +1,0 @@
-# function with no arguments, maybe void?
-(defun (main `int)
-    (ret (- 44 2))
-)
-# wee comments everywhere

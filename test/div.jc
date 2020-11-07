@@ -1,4 +1,0 @@
-(defun (main `int)
-    # note: because main returns int, the division is floored.
-    (ret (/ 128 3))
-)

@@ -1,7 +1,0 @@
-(devar (x `int) 2)
-(defun (main `int)
-    # x is shadowed by inner devar
-    (devar (x `int) 21)
-    (ret (+ x x))
-)
-(devar (x `int) 3)

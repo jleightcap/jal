@@ -1,5 +1,0 @@
-(devar (x `int) 40)
-(devar (y `int) 2)
-(defun (main `int)
-    (ret (+ x y))
-)

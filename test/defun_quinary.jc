@@ -1,6 +1,0 @@
-(defun (f `int (x `int))
-    (ret (? (< x 2) (+ x 1) (- x 1)))
-)
-(defun (main `int)
-    (ret (f 2))
-)

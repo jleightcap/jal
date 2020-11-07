@@ -1,5 +1,0 @@
-(devar (x `int) 2)
-(defun (main `int)
-    (print (? (< x 3) "lower!" "higher!"))
-    (ret 0)
-)

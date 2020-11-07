@@ -1,6 +1,0 @@
-(devar (y `int)
-    (? (< 2 5) 0 1)
-)
-(defun (main `int)
-    (ret y)
-)

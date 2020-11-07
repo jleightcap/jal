@@ -86,8 +86,8 @@ enum builtin {
     F_WHILE
 };
 enum ftype {
-    BUILTIN,
     DEF,
+    BUILTIN,
     CALL
 };
 struct func {
