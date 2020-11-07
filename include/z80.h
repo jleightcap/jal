@@ -25,6 +25,18 @@ struct _z80_reg {
     uint16_t SP;
 };
 
+struct _z80_reg_state {
+    bool A;
+    bool F;
+    bool B;
+    bool C;
+    bool D;
+    bool E;
+    bool IX;
+    bool IY;
+    bool SP;
+};
+
 
 // =========================================================================  //
 //                                                                            //

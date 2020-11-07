@@ -4,3 +4,7 @@ tags
 ./*.s
 ./*.jc
 *.bin
+
+# vim crap
+.*.swp
+.*.un~
