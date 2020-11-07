@@ -1,0 +1,4 @@
+(devar (x `int) 1)
+(defun (main `int)
+    (ret (? (<= x 2) 2 3))
+)

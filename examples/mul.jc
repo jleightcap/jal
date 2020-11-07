@@ -1,0 +1,3 @@
+(defun (main `int)
+    (ret (* 21 2))
+)

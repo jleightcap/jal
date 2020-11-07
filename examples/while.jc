@@ -1,0 +1,8 @@
+(defun (main `int)
+    (devar (ii `int) 10)
+    (while (> ii 10)
+        (print "around we go")
+        (-= ii 1)
+    )
+    (ret ii)
+)

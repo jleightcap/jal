@@ -1,0 +1,5 @@
+# function with no arguments, maybe void?
+(defun (main `int)
+    (ret (+ (* 8 5) (- 101 99)))
+)
+# wee comments everywhere

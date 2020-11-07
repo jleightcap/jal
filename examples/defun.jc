@@ -1,0 +1,7 @@
+(defun (f `int (x `int))
+    (ret 3)
+)
+
+(defun (main `int)
+    (ret (f 2))
+)
