@@ -63,9 +63,6 @@ scan()
         else if(hash == hashstr("ret") && symlen == 3) {
             tok.type = RET;
         }
-        else if(hash == hashstr("print") && symlen == 5) {
-            tok.type = PRINT;
-        }
         else if(hash == hashstr("while") && symlen == 5) {
             tok.type = WHILE;
         }

@@ -159,11 +159,6 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             func_init(&e->e.func, VOID, BUILTIN, 0, F_RET, 1, 1, venv);
             parse_ret(e, fenv, venv);
             break;
-        case PRINT:
-            //printf("print\n");
-            func_init(&e->e.func, VOID, BUILTIN, 0, F_PRINT, 1, 1, venv);
-            parse_print(e, fenv, venv);
-            break;
         case QUINARY:
             //printf("quinary\n");
             // TODO: the consequence branch should be optional!
@@ -388,17 +383,6 @@ parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv)
     currtok = scan();
     parse_expr(e->e.func.body[0] = expr_init(), fenv, venv);
     checktok((currtok = scan()), RPAREN, "return end");
-}
-
-// parse a print expression
-// parsing begins with currtok pointing to token after 'print'
-// parsing ends with currtok pointing to ')' matching '(' before 'print'
-void
-parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv)
-{
-    currtok = scan();
-    parse_expr((e->e.func.body[0] = expr_init()), fenv, venv);
-    currtok = scan();
 }
 
 // parse a quinary expression

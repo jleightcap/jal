@@ -78,7 +78,6 @@ print_builtin(const enum builtin b)
     case F_DEFUN: printf("defun"); break;
     case F_DEVAR: printf("devar"); break;
     case F_RET:   printf("ret");   break;
-    case F_PRINT: printf("print"); break;
     case F_WHILE: printf("while"); break;
     }
 }

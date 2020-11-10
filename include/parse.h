@@ -82,7 +82,6 @@ enum builtin {
     F_DEFUN,
     F_DEVAR,
     F_RET,
-    F_PRINT,
     F_WHILE
 };
 enum ftype {

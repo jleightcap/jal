@@ -38,7 +38,6 @@ enum toktype {
     DEFUN,
     DEVAR,
     RET,
-    PRINT,
     WHILE,
     FOR,
 
