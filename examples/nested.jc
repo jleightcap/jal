@@ -1,5 +1,5 @@
 # function with no arguments, maybe void?
 (defun (main `int)
-    (ret (+ (+ 37 3) (- 3 1)))
+    (ret (+ (+ 38 2) (- 3 1)))
 )
 # wee comments everywhere
