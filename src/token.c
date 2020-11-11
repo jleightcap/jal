@@ -60,6 +60,30 @@ scan_symbol(struct token* tok, const char* stream, int* fp)
     }
 }
 
+void
+scan_type(struct token* tok, const char* stream, int* fp)
+{
+    (*fp)++; // move past '`' prefix
+    unsigned long hash = file[*fp];
+    for(; issymbol(file[*fp]); (*fp)++) {
+        hash = (hash * 67 + file[*fp]) % ENV_SIZE;
+    }
+    tok->value.hash = hash;
+    
+    // RESERVED TYPE HASHES
+    if(hash == hashstr("int"))
+        tok->type = TYPE_INT;
+    else
+    if(hash == hashstr("string"))
+        tok->type = TYPE_STR;
+    else
+    if(hash == hashstr("void"))
+        tok->type = TYPE_VOID;
+    else {
+        panic("invalid type declaration!");
+    }
+}
+
 struct token
 scan(void)
 {
@@ -87,25 +111,7 @@ scan(void)
 
     // TYPES
     if(file[fp] == '`') {
-        fp++;
-        unsigned long hash = file[fp];
-        for(; issymbol(file[fp]); fp++) {
-            hash = (hash * 67 + file[fp]) % ENV_SIZE;
-        }
-        tok.value.hash = hash;
-        
-        // RESERVED TYPE HASHES
-        if(hash == hashstr("int"))
-            tok.type = TYPE_INT;
-        else
-        if(hash == hashstr("string"))
-            tok.type = TYPE_STR;
-        else
-        if(hash == hashstr("void"))
-            tok.type = TYPE_VOID;
-        else
-            fprintf(stderr, "invalid type declaration!\n");
-
+        scan_type(&tok, file, &fp);
         return tok;
     }
 
@@ -157,39 +163,38 @@ scan(void)
     // OVERLAPING CHARACTER TOKENS
     switch(file[fp]) {
     case '<': switch(file[fp + 1]) {
-              case '<': tok.type = LSL; fp++; break;
-              case '=': tok.type = LE;  fp++; break;
-              default:  tok.type = LT;        break;
+    /* <<  */ case '<': tok.type = LSL; fp++; break;
+    /* <=  */ case '=': tok.type = LE;  fp++; break;
+    /* <   */ default:  tok.type = LT;        break;
               } fp++; return tok;
     case '>': switch(file[fp + 1]) {
-              case '>': tok.type = LSR; fp++; break;
-              case '=': tok.type = GE;  fp++; break;
-              default:  tok.type = GT;        break;
+    /* >>  */ case '>': tok.type = LSR; fp++; break;
+    /* >=  */ case '=': tok.type = GE;  fp++; break;
+    /* >   */ default:  tok.type = GT;        break;
               } fp++; return tok;
     case '=': switch(file[fp + 1]) {
-              case '=': tok.type = EQ;     fp++; break;
-              default:  tok.type = ASSIGN;       break;
+    /* ==  */ case '=': tok.type = EQ;     fp++; break;
+    /* =   */ default:  tok.type = ASSIGN;       break;
               } fp++; return tok;
     case '!': switch(file[fp + 1]) {
-              case '=': tok.type = NE;  fp++; break;
-              default:  tok.type = NOT;       break;
+    /* !=  */ case '=': tok.type = NE;  fp++; break;
+    /* !   */ default:  tok.type = NOT;       break;
               } fp++; return tok;
     case '+': switch(file[fp + 1]) {
-              case '+': tok.type = INC; fp++; break;
-              case '=': tok.type = PEQ; fp++; break;
-              default:  tok.type = ADD;       break;
+    /* ++  */ case '+': tok.type = INC; fp++; break;
+    /* +=  */ case '=': tok.type = PEQ; fp++; break;
+    /* +   */ default:  tok.type = ADD;       break;
               } fp++; return tok;
     case '-': switch(file[fp + 1]) {
-              case '-': tok.type = DEC; fp++; break;
-              case '=': tok.type = MEQ; fp++; break;
-              default:  tok.type = SUB;       break;
+    /* --  */ case '-': tok.type = DEC; fp++; break;
+    /* -=  */ case '=': tok.type = MEQ; fp++; break;
+    /* -   */ default:  tok.type = SUB;       break;
               } fp++; return tok;
     default: break;
     }
 
     // No matches! Tokenizing failed.
-    fprintf(stderr, "token parsing error!\n");
-    exit(-1);
+    panic("token parsing error!");
 }
 
 // return the next token's literal string value
@@ -213,6 +218,7 @@ scan_string(void)
     assert(file[fp++] == '"' && "expected start of string in scan_string!");
     unsigned long ii = 0; // long probably overkill, but in case MAX_STRLEN > 256
     while(file[fp] != '"') {
+        assert(str[ii] != '\\' && "didn't expect escape character in path string!");
         str[ii] = file[fp];
         fp++; ii++;
         assert(ii < MAX_STRLEN - 1 && "exceeded string buffer in scan_string, increase MAX_STRLEN!");
