@@ -5,7 +5,7 @@
 #include "token.h"
 #include "util.h"
 
-static int filepos = 0;              // file position
+static int filepos = 0;            // file position
 static const char* srcfile = NULL; // global FILE for tokenizing
 static int srclen = 0;             // global FILE length
 

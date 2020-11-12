@@ -123,15 +123,22 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
         break;
     }
     case FT_CALL: {
-        emit("\tTODO: call defined functions\n");
-        for(unsigned int ii = 0; ii < f->exprs; ii++) {
-            emit_expr(f->body[ii], venv, fenv);
+        panic("TODO: call defined function");
+    }
+    case FT_IMPORT: {
+        char namebuf[sizeof(unsigned long)];
+        const unsigned long mainhash = f->name.hash;
+        sprintf(namebuf, "%lx", mainhash);
+        for(unsigned int ii = 0; ii < f->argnum; ii++) {
+            assert(f->body[ii]->exprtype == LITERAL &&
+                   f->body[ii]->e.lit.t == INT &&
+                   "TODO: non-int arguments in import call");
+            emit("\tld hl, "); emit_expr(f->body[ii], venv, fenv); emit("\n");
+            emit("\tpush hl\n");
         }
+        emit("\tcall func_"); emit(namebuf); emit("\n");
         break;
     }
-    default:
-        panic("Unhanlded function type in emit_func!");
-        break;
     }
 }
 
@@ -159,16 +166,19 @@ emit_var(struct var const* v, struct varenv const* venv, struct funenv const* fe
 }
 
 void
-emit_z80(FILE* f, struct funenv const* fenv, struct varenv const* venv)
+z80_emit_include(const char* path)
 {
-    _z80_out = f;
-    // use malloc for unintialized memory valgrind warnings
-    _z80_reg = malloc(sizeof(struct _z80_reg));
-    // RAM and register states are initially 0, can use uninitialized
-    _z80_reg_state = calloc(1, sizeof(struct _z80_reg_state));
-    _z80_ram = calloc(RAMSIZE, sizeof(word));
+    emit("include '"); emit(path); emit("'\n\n");
+}
 
-    // entrypoint
+void
+z80_emit(const struct funenv* fenv, const struct varenv* venv)
+{
+    // because emitting every function as ordered by hash,
+    // first instructions are to jump to main entrypoint.
+    //
+    // other strategy is to emit the main function, and then
+    // recursively only the functions reachable from main.
     emit("start:\n");
     char namebuf[sizeof(unsigned long)];
     const unsigned long mainhash = hashstr("main");
@@ -176,13 +186,30 @@ emit_z80(FILE* f, struct funenv const* fenv, struct varenv const* venv)
     emit("\tcall func_"); emit(namebuf); emit("\n");
     emit("\thalt\n\n");
 
+    // go through entire function environment, emmiting
+    // any entries that have an associated body.
     for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
         // found a function; has expressions
         if(fenv->env[ii].exprs > 0) {
             emit_func(&fenv->env[ii], venv, fenv);
         }
     }
+}
 
+void
+z80_emit_init(FILE* f)
+{
+    _z80_out = f;
+    // use malloc for unintialized memory valgrind warnings
+    _z80_reg = malloc(sizeof(struct _z80_reg));
+    // RAM and register states are initially 0, can use uninitialized
+    _z80_reg_state = calloc(1, sizeof(struct _z80_reg_state));
+    _z80_ram = calloc(RAMSIZE, sizeof(word));
+}
+
+void
+z80_emit_free(void)
+{
     free(_z80_ram);
     free(_z80_reg_state);
     free(_z80_reg);

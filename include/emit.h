@@ -6,6 +6,15 @@
 #include "parse.h"
 
 void
-emit(FILE* f, const struct funenv* fenv, const struct varenv* venv);
+emit_init(FILE* f);
+
+void
+emit_free(void);
+
+void
+emit(const struct funenv* fenv, const struct varenv* venv);
+
+void
+emit_include(const char* path);
 
 #endif

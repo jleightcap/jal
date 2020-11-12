@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "emit.h"
 #include "eval.h"
 #include "parse.h"
 #include "token.h"
@@ -268,8 +269,18 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         case SYM: {
             //printf("func call\n");
             struct func* f = &fenv->env[currtok.value.hash];
-            func_init(&e->e.func, f->t, FT_CALL,
-                      f->name.hash, 0, f->argnum, f->exprs, venv);
+            switch(f->ft) {
+            case FT_CALL:
+                func_init(&e->e.func, f->t, FT_CALL,
+                          f->name.hash, 0, f->argnum, f->exprs, venv);
+                break;
+            case FT_IMPORT:
+                func_init(&e->e.func, f->t, FT_IMPORT,
+                          f->name.hash, 0, f->argnum, f->exprs, venv);
+                break;
+            default:
+                panic("expected callable function, got an enexpected ftype!");
+            }
             parse_call(e, fenv, venv);
             break;
             }
@@ -385,6 +396,9 @@ parse_devar(struct funenv* fenv, struct varenv* venv)
 // parse an `import` statement
 // parsing begins with currtok pointing to token `import`
 // parsing ends with currtok pointing to ')' after statement body
+//
+// returns the file path to import, which is needed in the resulting
+// emitted assembly
 void
 parse_import(struct funenv* fenv, struct varenv* venv)
 {
@@ -397,7 +411,7 @@ parse_import(struct funenv* fenv, struct varenv* venv)
 
     // open that file path
     const char* importpath = currtok.value.str;
-    printf("%s\n", importpath);
+    emit_include(importpath);
     if(!(ifd = open(importpath, O_RDONLY))) {
         fprintf(stderr, "parse_import: unable to open %s\n", importpath);
         exit(-1);
@@ -413,6 +427,7 @@ parse_import(struct funenv* fenv, struct varenv* venv)
     int ifp = 0;
     unsigned int argnum = 0;
     struct token importtok;
+
     scan(&importtok, importcontent, &ifp, ilen);
     checktok(importtok, LPAREN, "import signature begin");
     scan(&importtok, importcontent, &ifp, ilen);
@@ -420,6 +435,7 @@ parse_import(struct funenv* fenv, struct varenv* venv)
     unsigned long name = importtok.value.hash;
     scan(&importtok, importcontent, &ifp, ilen);
     enum type rettype = typetok_to_type(importtok.type);
+
     for(scan(&importtok, importcontent, &ifp, ilen);
         importtok.type == LPAREN;
         scan(&importtok, importcontent, &ifp, ilen))

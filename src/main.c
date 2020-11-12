@@ -42,13 +42,13 @@ main(int ac, char** av) {
     struct varenv* venv = calloc(1, sizeof(struct varenv)); // global variable environment
     setstream(file, sb.st_size);
 
+    emit_init(outf);
+
     parse(fenv, venv);
-
     print_fenv(fenv);
+    emit(fenv, venv);
 
-    // emit assembly from 'main' expression tree entrypoint
-    emit(outf, fenv, venv);
-
+    emit_free();
     funenv_free(fenv);
     varenv_free(venv);
 

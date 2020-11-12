@@ -45,6 +45,15 @@ struct _z80_reg_state {
 // =========================================================================  //
 
 void
-emit_z80(FILE* f, struct funenv const* fenv, struct varenv const* venv);
+z80_emit_init(FILE* f);
+
+void
+z80_emit_free(void);
+
+void
+z80_emit(const struct funenv* fenv, const struct varenv* venv);
+
+void
+z80_emit_include(const char* path);
 
 #endif

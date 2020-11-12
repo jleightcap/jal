@@ -147,10 +147,9 @@ print_func(const struct func* f, const unsigned int nest) {
         }
         break;
     case FT_IMPORT:
-        panic("TODO: print import function");
     case FT_CALL:
         if(f->name.hash == hashstr("main")) { // only mandatory hash
-            panic("main is only implicitly called!");
+            panic("can't print main as a call: only implicitly called!");
         }
         else {
             printf("func [%ld]: ", f->name.hash); printf("\n");
