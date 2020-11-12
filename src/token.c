@@ -84,12 +84,10 @@ scan_type(struct token* tok, const char* file, int* fp)
     }
 }
 
+// general scan for any FILE contents `file` at any position `fp`
 void
 scan(struct token* tok, const char* file, int* fp, const int len)
 {
-    assert(file != NULL && "file stream not initialized: use setstream!");
-    assert(len  != 0    && "len not initialized: use setstream!");
-
     // skip whitespace and comments ('#' to '\n' or EOF)
     while(iswhitespace(file[*fp])) (*fp)++;
     while(file[*fp] == '#') {
@@ -195,45 +193,13 @@ scan(struct token* tok, const char* file, int* fp, const int len)
     panic("token parsing error!");
 }
 
-// return the next token's literal string value
-// callee must free returned char*
-/*
-char*
-scan_string(void)
-{
-    assert(file != NULL && "file stream not initialized: use setstream!");
-    assert(len  != 0    && "len not initialized: use setstream!");
-
-    char* str = malloc(MAX_STRLEN * sizeof(char));
-
-    // skip whitespace and comments ('#' to '\n' or EOF)
-    while(iswhitespace(file[fp])) fp++;
-    while(file[fp] == '#') {
-        while(file[fp] != '\n' && file[fp] != EOF) fp++;
-        while(iswhitespace(file[fp])) fp++;
-    }
-    if(fp >= len) { panic("scanned past end of file when expecting a string!"); }
-
-    assert(file[fp++] == '"' && "expected start of string in scan_string!");
-    unsigned long ii = 0; // long probably overkill, but in case MAX_STRLEN > 256
-    while(file[fp] != '"') {
-        assert(str[ii] != '\\' && "didn't expect escape character in path string!");
-        str[ii] = file[fp];
-        fp++; ii++;
-        assert(ii < MAX_STRLEN - 1 && "exceeded string buffer in scan_string, increase MAX_STRLEN!");
-    }
-    assert(file[fp] == '"' && "expected end of string in scan_string!");
-
-    str[ii + 1] = '\0'; // null terminate string
-    fp++;
-
-    return str;
-}
-*/
-
+// scan, but default to global values
 struct token
 fscan(void)
 {
+    assert(srcfile != NULL && "file stream not initialized: use setstream!");
+    assert(srclen  != 0    && "len not initialized: use setstream!");
+
     struct token tok;
     scan(&tok, srcfile, &filepos, srclen);
     return tok;

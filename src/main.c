@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -5,7 +6,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <unistd.h>
 
 #include "emit.h"
 #include "eval.h"
@@ -51,5 +52,7 @@ main(int ac, char** av) {
     funenv_free(fenv);
     varenv_free(venv);
 
+    fclose(outf);
+    close(fd);
     return 0;
 }

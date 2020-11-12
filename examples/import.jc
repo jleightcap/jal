@@ -1,0 +1,5 @@
+(import "import.lbl") # import.lbl defines f
+
+(defun (main `int)
+    (ret (f 2 3))
+)

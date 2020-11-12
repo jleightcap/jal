@@ -111,16 +111,19 @@ print_defun(const struct func* f)
 {
     indt(0); // -Wno-type-limits
     switch(f->ft) {
-    case BUILTIN: 
+    case FT_BUILTIN: 
         printf("defun "); print_builtin(f->name.b); printf(": ");
         break;
-    case DEF:
+    case FT_DEF:
         if(f->name.hash == hashstr("main"))
             printf("defun main: ");
         else
             printf("defun [%ld]: ", f->name.hash);
         break;
-    case CALL:
+    case FT_IMPORT:
+        printf("import\n");
+        break;
+    case FT_CALL:
         panic("function call can't be top level!")
     }
     printf("\n");
@@ -133,9 +136,9 @@ print_defun(const struct func* f)
 void
 print_func(const struct func* f, const unsigned int nest) {
     switch(f->ft) {
-    case DEF:
+    case FT_DEF:
         panic("function definition not at top level!");
-    case BUILTIN:
+    case FT_BUILTIN:
         printf("func "); print_builtin(f->name.b); printf(": "); printf("\n");
         // TODO: print function signature
         // print body
@@ -143,7 +146,9 @@ print_func(const struct func* f, const unsigned int nest) {
             print_expr(f->body[ii], nest + 1);
         }
         break;
-    case CALL:
+    case FT_IMPORT:
+        panic("TODO: print import function");
+    case FT_CALL:
         if(f->name.hash == hashstr("main")) { // only mandatory hash
             panic("main is only implicitly called!");
         }

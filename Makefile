@@ -26,7 +26,7 @@ $(BIN): $(OBJS)
 %.o: %.c $(wildcard $(INCLUDE)/*.h)
 	$(CC) $(CFLAGS) $(DFLAGS) -c -o $@ $<
 
-# TEST=[testfile] make memtest
+
 memtest: $(BIN)
 	valgrind -q $(VFLAGS) ./$(BIN) $(TEST) /dev/null
 	cat -n $(VALGRIND)

@@ -45,7 +45,7 @@ static void
 emit_func(struct func const* f, struct varenv const* venv, struct funenv const* fenv)
 {
     switch(f->ft) {
-    case DEF: {
+    case FT_DEF: {
         // NOTE: this depends on the type used to hash function names!
 
         char namebuf[sizeof(unsigned long)];
@@ -56,7 +56,7 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
         }
         break;
     }
-    case BUILTIN: {
+    case FT_BUILTIN: {
         switch(f->name.b) {
         // accumulating binary operators
         case F_ADD: case F_SUB: case F_MUL: case F_DIV: case F_MOD:
@@ -72,9 +72,13 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
             for(unsigned int ii = 0; ii < f->exprs; ii++) {
                 switch(f->body[ii]->exprtype) {
                 case FUNCTION:
+                    assert(f->body[ii]->e.func.t == INT
+                           && "Unexpected non-arithmetic function!");
                     emit_func(&f->body[ii]->e.func, venv, fenv);
                     break;
                 case LITERAL:
+                    assert(f->body[ii]->e.lit.t == INT
+                           && "Unexpected literal in arithmetic expression!");
                     switch(f->name.b) {
                     case F_ADD: {
                         emit("\tadd A, "); break;
@@ -83,7 +87,7 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
                         switch(ii) {
                         case 0: emit("\tadd A, "); break;
                         case 1: emit("\tsub ");    break;
-                        default: panic("unexpected sub args");
+                        default: panic("OOB sub arguments!");
                         }
                         break;
                     }
@@ -118,8 +122,11 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
         }
         break;
     }
-    case CALL: {
-        panic("TODO: call defined functions");
+    case FT_CALL: {
+        emit("\tTODO: call defined functions\n");
+        for(unsigned int ii = 0; ii < f->exprs; ii++) {
+            emit_expr(f->body[ii], venv, fenv);
+        }
         break;
     }
     default:
@@ -157,6 +164,7 @@ emit_z80(FILE* f, struct funenv const* fenv, struct varenv const* venv)
     _z80_out = f;
     // use malloc for unintialized memory valgrind warnings
     _z80_reg = malloc(sizeof(struct _z80_reg));
+    // RAM and register states are initially 0, can use uninitialized
     _z80_reg_state = calloc(1, sizeof(struct _z80_reg_state));
     _z80_ram = calloc(RAMSIZE, sizeof(word));
 
@@ -168,7 +176,12 @@ emit_z80(FILE* f, struct funenv const* fenv, struct varenv const* venv)
     emit("\tcall func_"); emit(namebuf); emit("\n");
     emit("\thalt\n\n");
 
-    emit_func(&fenv->env[mainhash], venv, fenv);
+    for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {
+        // found a function; has expressions
+        if(fenv->env[ii].exprs > 0) {
+            emit_func(&fenv->env[ii], venv, fenv);
+        }
+    }
 
     free(_z80_ram);
     free(_z80_reg_state);

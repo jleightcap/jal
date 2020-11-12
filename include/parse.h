@@ -85,9 +85,10 @@ enum builtin {
     F_WHILE
 };
 enum ftype {
-    DEF,
-    BUILTIN,
-    CALL
+    FT_DEF,
+    FT_BUILTIN,
+    FT_IMPORT,
+    FT_CALL
 };
 struct func {
     // metadata
@@ -171,16 +172,49 @@ void
 parse(struct funenv* fenv, struct varenv* venv);
 
 // parse function signatures
-void parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_defun(struct funenv* fenv, struct varenv* venv);
-void parse_devar(struct funenv* fenv, struct varenv* venv);
-void parse_ret(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_print(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_quinary(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_while(struct expr* e, struct funenv* fenv, struct  varenv* venv);
-void parse_assign(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_uniop(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_binop(struct expr* e, struct funenv* fenv, struct varenv* venv);
-void parse_call(struct expr* e, struct funenv* fenv, struct varenv* venv);
+void
+parse_expr(struct expr* e,
+           struct funenv* fenv, struct varenv* venv);
+
+void
+parse_defun(struct funenv* fenv, struct varenv* venv);
+
+void
+parse_devar(struct funenv* fenv, struct varenv* venv);
+
+void
+parse_import(struct funenv* fenv, struct varenv* venv);
+
+void
+parse_ret(struct expr* e,
+          struct funenv* fenv, struct varenv* venv);
+
+void
+parse_print(struct expr* e,
+            struct funenv* fenv, struct varenv* venv);
+
+void
+parse_quinary(struct expr* e,
+              struct funenv* fenv, struct varenv* venv);
+
+void
+parse_while(struct expr* e,
+            struct funenv* fenv, struct  varenv* venv);
+
+void
+parse_assign(struct expr* e,
+             struct funenv* fenv, struct varenv* venv);
+
+void
+parse_uniop(struct expr* e,
+            struct funenv* fenv, struct varenv* venv);
+
+void
+parse_binop(struct expr* e,
+            struct funenv* fenv, struct varenv* venv);
+
+void
+parse_call(struct expr* e,
+           struct funenv* fenv, struct varenv* venv);
 
 #endif

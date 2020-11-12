@@ -19,9 +19,9 @@ eval(const enum type t, const struct expr* e,
         for(unsigned int ii = 0; ii < e->e.func.exprs; ii++)
             args[ii] = eval(t, e->e.func.body[ii], fenv, venv);
         switch(e->e.func.ft) {
-        case DEF:
+        case FT_DEF:
             panic("can't eval function definitions!");
-        case BUILTIN:
+        case FT_BUILTIN:
             switch(e->e.func.name.b) {
             // arithmetic
             case F_ADD:
@@ -124,7 +124,7 @@ eval(const enum type t, const struct expr* e,
                 panic("builtin not supported!\n");
             }
             break;
-        case CALL:
+        case FT_CALL:
         {
             struct func f = fenv->env[e->e.func.name.hash];
             // type-check, and populate function's arguments
@@ -143,7 +143,7 @@ eval(const enum type t, const struct expr* e,
             for(unsigned int ii = 0; ii < f.exprs; ii++) {
                 // unwrap Matryoshka-style for special return case
                 if(f.body[ii]->exprtype == FUNCTION &&
-                   f.body[ii]->e.func.ft == BUILTIN &&
+                   f.body[ii]->e.func.ft == FT_BUILTIN &&
                    f.body[ii]->e.func.name.b == F_RET)
                 {
                     assert(f.body[ii]->e.func.exprs == 1 && "expected 1 return expression!");
@@ -158,6 +158,8 @@ eval(const enum type t, const struct expr* e,
                 }
             }
             break;
+        case FT_IMPORT:
+            panic("can't eval an import expression!");
         }
         }
         break;

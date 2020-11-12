@@ -99,7 +99,4 @@ scan(struct token*, const char*, int*, const int);
 struct token
 fscan(void);
 
-char*
-scan_string(void);
-
 #endif
