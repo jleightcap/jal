@@ -35,6 +35,7 @@ enum toktype {
 
     // reserved symbols
     MAIN,
+    IMPORT,
     DEFUN,
     DEVAR,
     RET,
@@ -92,7 +93,13 @@ struct token {
 void
 setstream(const char stream[], int streamlen);
 
+void
+scan(struct token*, const char*, int*, const int);
+
 struct token
-scan();
+fscan(void);
+
+char*
+scan_string(void);
 
 #endif
