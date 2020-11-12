@@ -96,6 +96,8 @@ setstream(const char stream[], int streamlen);
 void
 scan(struct token*, const char*, int*, const int);
 
+void scan_symbol_name(char* str, struct token* tok, const char* file, int* fp);
+
 struct token
 fscan(void);
 

@@ -126,9 +126,6 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
         panic("TODO: call defined function");
     }
     case FT_IMPORT: {
-        char namebuf[sizeof(unsigned long)];
-        const unsigned long mainhash = f->name.hash;
-        sprintf(namebuf, "%lx", mainhash);
         for(unsigned int ii = 0; ii < f->argnum; ii++) {
             assert(f->body[ii]->exprtype == LITERAL &&
                    f->body[ii]->e.lit.t == INT &&
@@ -136,7 +133,7 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
             emit("\tld hl, "); emit_expr(f->body[ii], venv, fenv); emit("\n");
             emit("\tpush hl\n");
         }
-        emit("\tcall func_"); emit(namebuf); emit("\n");
+        emit("\tcall "); emit(f->name.import); emit("\n");
         break;
     }
     }

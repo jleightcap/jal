@@ -60,6 +60,28 @@ scan_symbol(struct token* tok, const char* file, int* fp)
     }
 }
 
+// same as scan_symbol(), but return the scanned string itself
+void
+scan_symbol_name(char* str, struct token* tok, const char* file, int* fp)
+{
+    unsigned int symlen = 0;
+    unsigned long hash = file[*fp];
+    // symbols can't start with number characters, but can include them
+    for(; issymbol(file[*fp]) || isnum(file[*fp]); (*fp)++) {
+        hash = (hash * 67 + file[*fp]) % ENV_SIZE;
+        str[symlen] = file[*fp];
+        symlen++;
+        assert(symlen < MAX_STRLEN - 1 &&
+               "exceeded string buffer: increase MAX_STRLEN!");
+    }
+    str[symlen + 1] = '\0'; // null terminate string
+    tok->value.hash = hash;
+    tok->type = SYM;
+    // reserved keywords (toktype FOR, WHILE, MAIN, etc.)
+    // shouldn't need to return the string itself.
+    // that is relegated to scan_symbol().
+}
+
 void
 scan_type(struct token* tok, const char* file, int* fp)
 {

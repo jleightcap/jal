@@ -411,7 +411,6 @@ parse_import(struct funenv* fenv, struct varenv* venv)
 
     // open that file path
     const char* importpath = currtok.value.str;
-    emit_include(importpath);
     if(!(ifd = open(importpath, O_RDONLY))) {
         fprintf(stderr, "parse_import: unable to open %s\n", importpath);
         exit(-1);
@@ -423,14 +422,18 @@ parse_import(struct funenv* fenv, struct varenv* venv)
     }
     const int ilen = isb.st_size;
 
+    // add that 'import' to the top of the emitted file
+    emit_include(importpath);
+
     // parse imported function signatures
     int ifp = 0;
     unsigned int argnum = 0;
+    char* fname = calloc(MAX_STRLEN, sizeof(char));
     struct token importtok;
 
     scan(&importtok, importcontent, &ifp, ilen);
     checktok(importtok, LPAREN, "import signature begin");
-    scan(&importtok, importcontent, &ifp, ilen);
+    scan_symbol_name(fname, &importtok, importcontent, &ifp);
     checktok(importtok, SYM, "import function name");
     unsigned long name = importtok.value.hash;
     scan(&importtok, importcontent, &ifp, ilen);
@@ -450,8 +453,11 @@ parse_import(struct funenv* fenv, struct varenv* venv)
 
     }
     func_init(&fenv->env[name], rettype, FT_IMPORT, name, 0, argnum, 0, venv);
+    memcpy(fenv->env[name].name.import, fname, MAX_STRLEN);
+    printf("%s hash %ld\n", fenv->env[name].name.import, importtok.value.hash);
 
     // clean up
+    free(fname);
     close(ifd);
     checktok((currtok = fscan()), RPAREN, "import statement end");
 }

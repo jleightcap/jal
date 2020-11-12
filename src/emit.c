@@ -42,7 +42,10 @@ emit_include(const char* path)
     memcpy(asmpath, path, ii);
     char suffix[5] = ".asm";
     memcpy(asmpath + ii, suffix, 5);
+
     z80_emit_include(asmpath);
+
+    free(asmpath);
 }
 #endif
 
