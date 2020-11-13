@@ -143,6 +143,14 @@ scan(struct token* tok, const char* file, int* fp, const int len)
         tok->value.num = numlit;
         return;
     }
+    // char literal, store as int
+    if(file[*fp] == '\'') {
+        tok->type = A_INT;
+        tok->value.num = (int)file[++(*fp)];
+        assert(file[++(*fp)] == '\'' && "unexpected char literal!");
+        (*fp)++;
+        return;
+    }
     // string literal
     if(file[*fp] == '"') {
         unsigned int strpos = 0;

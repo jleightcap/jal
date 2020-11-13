@@ -156,10 +156,9 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
         // reserved symbols
         case DEFUN: // define the builtin 'defun' function
             //printf("defun\n");
-            panic("function definitions only at top level!");
+            panic("function definition not at top level!");
         case DEVAR:
             //printf("devar\n");
-            // parsing devar is also done at top level, so add metadata here
             func_init(&e->e.func, VOID, FT_BUILTIN, 0, F_DEVAR, 0, 0, venv);
             parse_devar(fenv, venv);
             break;
@@ -270,16 +269,19 @@ parse_expr(struct expr* e, struct funenv* fenv, struct varenv* venv)
             //printf("func call\n");
             struct func* f = &fenv->env[currtok.value.hash];
             switch(f->ft) {
-            case FT_CALL:
+            case FT_DEF: // calling something previously defined
                 func_init(&e->e.func, f->t, FT_CALL,
                           f->name.hash, 0, f->argnum, f->exprs, venv);
                 break;
-            case FT_IMPORT:
+            case FT_IMPORT: // calling imported function
                 func_init(&e->e.func, f->t, FT_IMPORT,
                           f->name.hash, 0, f->argnum, f->exprs, venv);
                 break;
             default:
-                panic("expected callable function, got an enexpected ftype!");
+                fprintf(stderr,
+                        "expected callable function, got an enexpected ftype %d!\n",
+                        f->ft);
+                exit(-1);
             }
             parse_call(e, fenv, venv);
             break;
@@ -454,7 +456,7 @@ parse_import(struct funenv* fenv, struct varenv* venv)
     }
     func_init(&fenv->env[name], rettype, FT_IMPORT, name, 0, argnum, 0, venv);
     memcpy(fenv->env[name].name.import, fname, MAX_STRLEN);
-    printf("%s hash %ld\n", fenv->env[name].name.import, importtok.value.hash);
+    //printf("%s hash %ld\n", fenv->env[name].name.import, importtok.value.hash);
 
     // clean up
     free(fname);
