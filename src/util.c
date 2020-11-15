@@ -115,10 +115,7 @@ print_defun(const struct func* f)
         printf("defun "); print_builtin(f->name.b); printf(": ");
         break;
     case FT_DEF:
-        if(f->name.hash == hashstr("main"))
-            printf("defun main: ");
-        else
-            printf("defun [%ld]: ", f->name.hash);
+        printf("defun %s: ", f->name.fname);
         break;
     case FT_IMPORT:
         printf("import\n");

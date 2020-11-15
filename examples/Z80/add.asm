@@ -1,7 +1,3 @@
-start:
-    call main
-    halt
-
 main:
     ld B, $28 ; result of arg1
     ld C, $2  ; result of arg2

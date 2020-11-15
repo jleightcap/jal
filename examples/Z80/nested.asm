@@ -1,7 +1,3 @@
-start:
-    call main
-    halt
-
 main:
     ; expression tree for nested expression 
     ; (+ (+ 8 5) (- 3 1)):
