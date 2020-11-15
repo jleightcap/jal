@@ -97,7 +97,7 @@ struct func {
     union {
         unsigned long hash;
         enum builtin b;
-        char import[MAX_STRLEN];
+        char fname[MAX_STRLEN];
     } name; // tagged by ft
     
     // args

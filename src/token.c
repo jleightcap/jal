@@ -60,11 +60,17 @@ scan_symbol(struct token* tok, const char* file, int* fp)
     }
 }
 
-// same as scan_symbol(), but return the scanned string itself
+// same as scan_symbol(), but maintain the scanned string itself
+// optional `file` and `fp` args for imported files, if NULL is passed
+// to either, falls back on global srcfile
 void
 scan_symbol_name(char* str, struct token* tok, const char* file, int* fp)
 {
     unsigned int symlen = 0;
+    // fall back to global file if file/fp are NULL
+    if(file == NULL) { file = srcfile; }
+    if(fp == NULL) { fp = &filepos; }
+
     unsigned long hash = file[*fp];
     // symbols can't start with number characters, but can include them
     for(; issymbol(file[*fp]) || isnum(file[*fp]); (*fp)++) {
@@ -146,7 +152,7 @@ scan(struct token* tok, const char* file, int* fp, const int len)
     // char literal, store as int
     if(file[*fp] == '\'') {
         tok->type = A_INT;
-        tok->value.num = (int)file[++(*fp)];
+        tok->value.num = (unsigned int)file[++(*fp)];
         assert(file[++(*fp)] == '\'' && "unexpected char literal!");
         (*fp)++;
         return;

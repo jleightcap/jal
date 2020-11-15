@@ -46,13 +46,12 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
 {
     switch(f->ft) {
     case FT_DEF: {
-        // NOTE: this depends on the type used to hash function names!
-
-        char namebuf[sizeof(unsigned long)];
-        sprintf(namebuf, "%lx", f->name.hash);
-        emit("func_"); emit(namebuf); emit(":\n");
+        emit(f->name.fname); emit(":\n");
         for(unsigned int ii = 0; ii < f->exprs; ii++) {
             emit_expr(f->body[ii], venv, fenv);
+        }
+        if(f->t == VOID) {
+            emit("\tret\n");
         }
         break;
     }
@@ -133,7 +132,7 @@ emit_func(struct func const* f, struct varenv const* venv, struct funenv const* 
             emit("\tld hl, "); emit_expr(f->body[ii], venv, fenv); emit("\n");
             emit("\tpush hl\n");
         }
-        emit("\tcall "); emit(f->name.import); emit("\n");
+        emit("\tcall "); emit(f->name.fname); emit("\n");
         break;
     }
     }
@@ -145,7 +144,7 @@ emit_lit(struct lit const* l, struct varenv const* venv, struct funenv const* fe
     switch(l->t) {
         case INT: {
             char numbuf[50]; // if using more than 50 digits I don't care
-            sprintf(numbuf, "%x", l->litval.integer);
+            sprintf(numbuf, "%d", l->litval.integer);
             emit(numbuf);
             break;
         }
@@ -176,13 +175,7 @@ z80_emit(const struct funenv* fenv, const struct varenv* venv)
     //
     // other strategy is to emit the main function, and then
     // recursively only the functions reachable from main.
-    emit("start:\n");
-    char namebuf[sizeof(unsigned long)];
-    const unsigned long mainhash = hashstr("main");
-    sprintf(namebuf, "%lx", mainhash);
-    emit("\tcall func_"); emit(namebuf); emit("\n");
-    emit("\thalt\n\n");
-
+    
     // go through entire function environment, emmiting
     // any entries that have an associated body.
     for(unsigned int ii = 0; ii < ENV_SIZE; ii++) {

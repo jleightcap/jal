@@ -324,12 +324,17 @@ parse_defun(struct funenv* fenv, struct varenv* venv)
 {
     // FUNCTION SIGNATURE PARSING
     checktok((currtok = fscan()), LPAREN, "function signature begin");
-    currtok = fscan(); // function name
+    char* fname = calloc(MAX_STRLEN, sizeof(char));
+    // because name information is unioned, currently only fname or hash
+    // are stored in struct func.
+    // does a function need to know its hash?
+    scan_symbol_name(fname, &currtok, NULL, NULL);
     const unsigned long name = currtok.value.hash;
+    memcpy(fenv->env[name].name.fname, fname, MAX_STRLEN);
+    free(fname);
     currtok = fscan(); // function return type
     fenv->env[name].t = typetok_to_type(currtok.type);
     fenv->env[name].ft = FT_DEF;
-    fenv->env[name].name.hash = name;
 
     // ENVIRONMENT INHERITANCE
     fenv->env[name].venv = malloc(sizeof(struct varenv));
@@ -424,9 +429,6 @@ parse_import(struct funenv* fenv, struct varenv* venv)
     }
     const int ilen = isb.st_size;
 
-    // add that 'import' to the top of the emitted file
-    emit_include(importpath);
-
     // parse imported function signatures
     int ifp = 0;
     unsigned int argnum = 0;
@@ -455,7 +457,7 @@ parse_import(struct funenv* fenv, struct varenv* venv)
 
     }
     func_init(&fenv->env[name], rettype, FT_IMPORT, name, 0, argnum, 0, venv);
-    memcpy(fenv->env[name].name.import, fname, MAX_STRLEN);
+    memcpy(fenv->env[name].name.fname, fname, MAX_STRLEN);
     //printf("%s hash %ld\n", fenv->env[name].name.import, importtok.value.hash);
 
     // clean up

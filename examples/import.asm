@@ -1,4 +1,4 @@
-func_3a8:
+f:
         pop hl
         pop hl
         ret
